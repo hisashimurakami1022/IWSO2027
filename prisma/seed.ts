@@ -19,7 +19,7 @@ async function main() {
 
   await prisma.track.upsert({
     where: { code: "GENERAL" },
-    update: {},
+    update: { name: "General", description: "General, uncategorized track" },
     create: {
       code: "GENERAL",
       name: "General",
