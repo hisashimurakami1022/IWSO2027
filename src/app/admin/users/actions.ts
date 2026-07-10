@@ -52,3 +52,19 @@ export async function inviteUserAction(
   revalidatePath("/admin/users");
   return { success: true };
 }
+
+export async function toggleExpertiseAction(userId: string, trackId: string, enabled: boolean) {
+  await requireChair();
+
+  if (enabled) {
+    await prisma.reviewerExpertise.upsert({
+      where: { reviewerId_trackId: { reviewerId: userId, trackId } },
+      update: {},
+      create: { reviewerId: userId, trackId },
+    });
+  } else {
+    await prisma.reviewerExpertise.deleteMany({ where: { reviewerId: userId, trackId } });
+  }
+
+  revalidatePath("/admin/users");
+}

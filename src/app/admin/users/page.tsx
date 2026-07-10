@@ -10,9 +10,16 @@ import {
 } from "@/components/ui/table";
 import { RoleToggle } from "./role-toggle";
 import { InviteUserDialog } from "./invite-user-dialog";
+import { ExpertiseDialog } from "./expertise-dialog";
 
 export default async function UsersPage() {
-  const users = await prisma.user.findMany({ orderBy: { createdAt: "asc" } });
+  const [users, tracks] = await Promise.all([
+    prisma.user.findMany({
+      orderBy: { createdAt: "asc" },
+      include: { reviewerExpertise: true },
+    }),
+    prisma.track.findMany({ orderBy: { name: "asc" } }),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -29,6 +36,7 @@ export default async function UsersPage() {
               <TableHead>Name</TableHead>
               <TableHead>Reviewer</TableHead>
               <TableHead>Chair</TableHead>
+              <TableHead>Expertise</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -41,6 +49,15 @@ export default async function UsersPage() {
                 </TableCell>
                 <TableCell>
                   <RoleToggle userId={u.id} role="CHAIR" checked={u.roles.includes("CHAIR")} />
+                </TableCell>
+                <TableCell>
+                  {u.roles.includes("REVIEWER") && (
+                    <ExpertiseDialog
+                      userId={u.id}
+                      tracks={tracks}
+                      expertiseTrackIds={u.reviewerExpertise.map((e) => e.trackId)}
+                    />
+                  )}
                 </TableCell>
               </TableRow>
             ))}
