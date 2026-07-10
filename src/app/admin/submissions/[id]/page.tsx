@@ -16,6 +16,7 @@ export default async function AdminSubmissionDetailPage({
       track: true,
       submitter: true,
       authors: { orderBy: { order: "asc" } },
+      file: true,
     },
   });
 
@@ -41,7 +42,20 @@ export default async function AdminSubmissionDetailPage({
         <CardHeader>
           <CardTitle>Abstract</CardTitle>
         </CardHeader>
-        <CardContent className="whitespace-pre-wrap text-sm">{submission.abstractText}</CardContent>
+        <CardContent className="text-sm">
+          {submission.file ? (
+            <a
+              href={`/api/submissions/${submission.id}/file`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-4"
+            >
+              {submission.file.fileName}
+            </a>
+          ) : (
+            <p className="text-muted-foreground">No abstract file uploaded.</p>
+          )}
+        </CardContent>
       </Card>
 
       {submission.keywords.length > 0 && (

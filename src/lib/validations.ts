@@ -11,9 +11,11 @@ export const submissionSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(300),
   trackId: z.string().min(1, "Select a track"),
   presentationType: z.enum(["ORAL", "POSTER"]),
-  abstractText: z.string().trim().min(1, "Abstract is required").max(5000),
   keywords: z.array(z.string().trim().min(1)).max(10),
   authors: z.array(submissionAuthorSchema).min(1, "At least one author is required"),
 });
 
 export type SubmissionInput = z.infer<typeof submissionSchema>;
+
+export const MAX_ABSTRACT_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+export const ABSTRACT_FILE_MIME_TYPE = "application/pdf";

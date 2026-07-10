@@ -147,7 +147,6 @@ model ConferenceSettings {
 model Submission {
   id               String           @id @default(cuid())
   title            String
-  abstractText     String           @db.Text
   keywords         String[]         @default([])
   presentationType PresentationType @default(ORAL)
   status           SubmissionStatus @default(DRAFT)
@@ -163,6 +162,7 @@ model Submission {
   track             Track                      @relation(fields: [trackId], references: [id])
   submitter         User                       @relation("Submitter", fields: [submitterId], references: [id])
   authors           SubmissionAuthor[]
+  file              SubmissionFile?
   reviewAssignments ReviewAssignment[]
   reviews           Review[]
   notificationLogs  NotificationLog[]
@@ -177,6 +177,18 @@ model SubmissionAuthor {
   affiliation     String?
   order           Int     @default(0)
   isCorresponding Boolean @default(false)
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+}
+
+model SubmissionFile {
+  id           String   @id @default(cuid())
+  submissionId String   @unique
+  fileName     String
+  mimeType     String
+  size         Int
+  data         Bytes
+  uploadedAt   DateTime @default(now())
 
   submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 }

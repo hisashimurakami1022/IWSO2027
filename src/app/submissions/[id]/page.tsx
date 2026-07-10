@@ -18,7 +18,7 @@ export default async function SubmissionDetailPage({
   const [submission, tracks] = await Promise.all([
     prisma.submission.findUnique({
       where: { id },
-      include: { authors: { orderBy: { order: "asc" } } },
+      include: { authors: { orderBy: { order: "asc" } }, file: true },
     }),
     prisma.track.findMany({ orderBy: { name: "asc" } }),
   ]);
@@ -52,7 +52,6 @@ export default async function SubmissionDetailPage({
                 title: submission.title,
                 trackId: submission.trackId,
                 presentationType: submission.presentationType,
-                abstractText: submission.abstractText,
                 keywords: submission.keywords,
                 authors: submission.authors.map((a) => ({
                   name: a.name,
@@ -60,6 +59,7 @@ export default async function SubmissionDetailPage({
                   affiliation: a.affiliation ?? "",
                   isCorresponding: a.isCorresponding,
                 })),
+                existingFileName: submission.file?.fileName ?? null,
               }}
             />
           </CardContent>
@@ -67,7 +67,18 @@ export default async function SubmissionDetailPage({
       ) : (
         <Card>
           <CardContent className="space-y-4 py-6 text-sm">
-            <p className="whitespace-pre-wrap">{submission.abstractText}</p>
+            {submission.file ? (
+              <a
+                href={`/api/submissions/${submission.id}/file`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-4"
+              >
+                {submission.file.fileName}
+              </a>
+            ) : (
+              <p className="text-muted-foreground">No abstract file uploaded.</p>
+            )}
           </CardContent>
         </Card>
       )}

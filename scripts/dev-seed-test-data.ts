@@ -24,11 +24,14 @@ async function main() {
     create: { email: "author1@example.com", name: "Author One" },
   });
 
+  const minimalPdf = Buffer.from(
+    "%PDF-1.1\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 3 3]>>endobj\ntrailer<</Root 1 0 R>>",
+    "utf-8"
+  );
+
   const submission = await prisma.submission.create({
     data: {
       title: "Collective Motion Patterns in Social Insect Swarms",
-      abstractText:
-        "We investigate emergent collective motion patterns in social insect swarms using an agent-based simulation framework.",
       keywords: ["swarm", "collective behavior"],
       presentationType: "ORAL",
       status: "SUBMITTED",
@@ -45,6 +48,14 @@ async function main() {
             order: 0,
           },
         ],
+      },
+      file: {
+        create: {
+          fileName: "abstract.pdf",
+          mimeType: "application/pdf",
+          size: minimalPdf.byteLength,
+          data: minimalPdf,
+        },
       },
     },
   });

@@ -39,7 +39,6 @@ export default async function NewSubmissionPage() {
               title: "",
               trackId: "",
               presentationType: "ORAL",
-              abstractText: "",
               keywords: [],
               authors: [
                 {

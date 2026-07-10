@@ -5,7 +5,6 @@ import { saveSubmissionAction, type SubmissionActionState } from "@/app/submissi
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -31,9 +30,9 @@ type SubmissionFormValues = {
   title: string;
   trackId: string;
   presentationType: "ORAL" | "POSTER";
-  abstractText: string;
   keywords: string[];
   authors: Author[];
+  existingFileName?: string | null;
 };
 
 const emptyAuthor: Author = { name: "", email: "", affiliation: "", isCorresponding: false };
@@ -138,17 +137,17 @@ export function SubmissionForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="abstractText">Abstract</Label>
-        <Textarea
-          id="abstractText"
-          name="abstractText"
-          required
-          rows={10}
-          maxLength={5000}
-          defaultValue={defaultValues?.abstractText}
-        />
-        {state.errors?.abstractText && (
-          <p className="text-sm text-destructive">{state.errors.abstractText[0]}</p>
+        <Label htmlFor="abstractFile">Abstract PDF</Label>
+        {defaultValues?.existingFileName && (
+          <p className="text-sm text-muted-foreground">
+            Current file: <span className="font-medium">{defaultValues.existingFileName}</span>.
+            Upload a new file to replace it.
+          </p>
+        )}
+        <Input id="abstractFile" name="abstractFile" type="file" accept="application/pdf" />
+        <p className="text-xs text-muted-foreground">PDF only, up to 10MB.</p>
+        {state.errors?.abstractFile && (
+          <p className="text-sm text-destructive">{state.errors.abstractFile[0]}</p>
         )}
       </div>
 
