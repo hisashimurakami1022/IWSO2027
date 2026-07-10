@@ -1,0 +1,259 @@
+// IWSO 2027 投稿・査読・プログラム管理システム データモデル
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  REVIEWER
+  CHAIR
+}
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  DECIDED
+  WITHDRAWN
+}
+
+enum Decision {
+  ACCEPT
+  REJECT
+}
+
+enum PresentationType {
+  ORAL
+  POSTER
+}
+
+enum ProgramSessionType {
+  ORAL_SESSION
+  POSTER_SESSION
+  KEYNOTE
+  BREAK
+}
+
+enum NotificationType {
+  MAGIC_LINK
+  SUBMISSION_CONFIRMATION
+  REVIEWER_ASSIGNED
+  REVIEW_REMINDER
+  DECISION_NOTIFICATION
+  PROGRAM_PUBLISHED
+}
+
+// --- Auth.js (NextAuth) 必須モデル ---
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  affiliation   String?
+  roles         Role[]    @default([])
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts          Account[]
+  sessions          Session[]
+  submissions       Submission[]        @relation("Submitter")
+  reviewAssignments ReviewAssignment[]
+  reviews           Review[]
+  notificationLogs  NotificationLog[]
+  reviewerExpertise ReviewerExpertise[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// --- 会議マスタ ---
+
+model Track {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+
+  submissions       Submission[]
+  reviewerExpertise ReviewerExpertise[]
+  programSessions   ProgramSession[]
+}
+
+model ReviewerExpertise {
+  id         String @id @default(cuid())
+  reviewerId String
+  trackId    String
+
+  reviewer User  @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+  track    Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewerId, trackId])
+}
+
+model ConferenceSettings {
+  id                 String    @id @default(cuid())
+  conferenceName     String    @default("IWSO 2027")
+  timezone           String    @default("Asia/Tokyo")
+  submissionDeadline DateTime?
+  reviewDeadline     DateTime?
+  notificationDate   DateTime?
+  updatedAt          DateTime  @updatedAt
+}
+
+// --- 投稿 ---
+
+model Submission {
+  id               String           @id @default(cuid())
+  title            String
+  abstractText     String           @db.Text
+  keywords         String[]         @default([])
+  presentationType PresentationType @default(ORAL)
+  status           SubmissionStatus @default(DRAFT)
+  decision         Decision?
+  trackId          String
+  submitterId      String
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  submittedAt      DateTime?
+  withdrawnAt      DateTime?
+  decidedAt        DateTime?
+
+  track             Track                      @relation(fields: [trackId], references: [id])
+  submitter         User                       @relation("Submitter", fields: [submitterId], references: [id])
+  authors           SubmissionAuthor[]
+  reviewAssignments ReviewAssignment[]
+  reviews           Review[]
+  notificationLogs  NotificationLog[]
+  programSessions   ProgramSessionSubmission[]
+}
+
+model SubmissionAuthor {
+  id              String  @id @default(cuid())
+  submissionId    String
+  name            String
+  email           String
+  affiliation     String?
+  order           Int     @default(0)
+  isCorresponding Boolean @default(false)
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+}
+
+// --- 査読 ---
+
+model ReviewAssignment {
+  id           String   @id @default(cuid())
+  submissionId String
+  reviewerId   String
+  assignedAt   DateTime @default(now())
+  assignedBy   String?
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  reviewer   User       @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+  review     Review?
+
+  @@unique([submissionId, reviewerId])
+}
+
+model Review {
+  id                String    @id @default(cuid())
+  assignmentId      String    @unique
+  submissionId      String
+  reviewerId        String
+  score             Int?
+  recommendation    Decision?
+  commentsForAuthor String?   @db.Text
+  commentsForChair  String?   @db.Text
+  submittedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  assignment ReviewAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  submission Submission       @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  reviewer   User             @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+}
+
+// --- プログラム編成 ---
+
+model ProgramSession {
+  id        String             @id @default(cuid())
+  title     String
+  room      String?
+  type      ProgramSessionType @default(ORAL_SESSION)
+  startTime DateTime
+  endTime   DateTime
+  trackId   String?
+  createdAt DateTime           @default(now())
+
+  track       Track?                     @relation(fields: [trackId], references: [id])
+  submissions ProgramSessionSubmission[]
+}
+
+model ProgramSessionSubmission {
+  id           String @id @default(cuid())
+  sessionId    String
+  submissionId String
+  orderIndex   Int    @default(0)
+
+  session    ProgramSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  submission Submission     @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, submissionId])
+}
+
+// --- 通知 ---
+
+model NotificationLog {
+  id           String           @id @default(cuid())
+  userId       String?
+  submissionId String?
+  type         NotificationType
+  subject      String
+  recipient    String
+  sentAt       DateTime         @default(now())
+
+  user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  submission Submission? @relation(fields: [submissionId], references: [id], onDelete: SetNull)
+}
