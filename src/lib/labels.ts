@@ -1,6 +1,7 @@
 import type {
   Decision,
   PresentationType,
+  ProgramSessionType,
   Role,
   SubmissionStatus,
 } from "@/generated/prisma/client";
@@ -26,4 +27,11 @@ export const PRESENTATION_TYPE_LABELS: Record<PresentationType, string> = {
 export const ROLE_LABELS: Record<Role, string> = {
   REVIEWER: "Reviewer",
   CHAIR: "Chair",
+};
+
+export const PROGRAM_SESSION_TYPE_LABELS: Record<ProgramSessionType, string> = {
+  ORAL_SESSION: "Oral Session",
+  POSTER_SESSION: "Poster Session",
+  KEYNOTE: "Keynote",
+  BREAK: "Break",
 };

@@ -67,7 +67,11 @@ export function ReviewForm({
           <Label htmlFor="recommendation">Recommendation</Label>
           <Select name="recommendation" defaultValue={defaultValues?.recommendation ?? undefined}>
             <SelectTrigger id="recommendation" className="w-full">
-              <SelectValue placeholder="Select a recommendation" />
+              <SelectValue placeholder="Select a recommendation">
+                {(value: keyof typeof DECISION_LABELS | null) =>
+                  value ? DECISION_LABELS[value] : "Select a recommendation"
+                }
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {Object.entries(DECISION_LABELS).map(([value, label]) => (

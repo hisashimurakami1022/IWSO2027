@@ -21,6 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ROLE_LABELS } from "@/lib/labels";
 
 const initialState: InviteUserActionState = {};
 
@@ -59,11 +60,13 @@ export function InviteUserDialog() {
             <Label htmlFor="role">Role</Label>
             <Select name="role" defaultValue="REVIEWER">
               <SelectTrigger id="role" className="w-full">
-                <SelectValue />
+                <SelectValue>
+                  {(value: keyof typeof ROLE_LABELS) => ROLE_LABELS[value]}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="REVIEWER">Reviewer</SelectItem>
-                <SelectItem value="CHAIR">Chair</SelectItem>
+                <SelectItem value="REVIEWER">{ROLE_LABELS.REVIEWER}</SelectItem>
+                <SelectItem value="CHAIR">{ROLE_LABELS.CHAIR}</SelectItem>
               </SelectContent>
             </Select>
           </div>

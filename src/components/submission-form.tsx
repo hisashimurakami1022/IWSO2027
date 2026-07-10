@@ -104,7 +104,9 @@ export function SubmissionForm({
           <Label htmlFor="trackId">Track</Label>
           <Select name="trackId" defaultValue={defaultValues?.trackId}>
             <SelectTrigger id="trackId" className="w-full">
-              <SelectValue placeholder="Select a track" />
+              <SelectValue placeholder="Select a track">
+                {(value: string | null) => tracks.find((t) => t.id === value)?.name ?? "Select a track"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {tracks.map((t) => (
@@ -123,7 +125,9 @@ export function SubmissionForm({
           <Label htmlFor="presentationType">Presentation Type</Label>
           <Select name="presentationType" defaultValue={defaultValues?.presentationType ?? "ORAL"}>
             <SelectTrigger id="presentationType" className="w-full">
-              <SelectValue />
+              <SelectValue>
+                {(value: keyof typeof PRESENTATION_TYPE_LABELS) => PRESENTATION_TYPE_LABELS[value]}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {Object.entries(PRESENTATION_TYPE_LABELS).map(([value, label]) => (
