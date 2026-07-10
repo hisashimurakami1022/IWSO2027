@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { SUBMISSION_STATUS_LABELS, PRESENTATION_TYPE_LABELS } from "@/lib/labels";
+import { SUBMISSION_STATUS_LABELS, PRESENTATION_TYPE_LABELS, DECISION_LABELS } from "@/lib/labels";
 
 export default async function AdminSubmissionDetailPage({
   params,
@@ -17,6 +17,7 @@ export default async function AdminSubmissionDetailPage({
       submitter: true,
       authors: { orderBy: { order: "asc" } },
       file: true,
+      reviewAssignments: { include: { reviewer: true, review: true } },
     },
   });
 
@@ -84,6 +85,48 @@ export default async function AdminSubmissionDetailPage({
               <span className="text-muted-foreground">{a.email}</span>
               {a.affiliation && <span className="text-muted-foreground">({a.affiliation})</span>}
               {a.isCorresponding && <Badge variant="outline">Corresponding</Badge>}
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Reviews</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 text-sm">
+          {submission.reviewAssignments.length === 0 && (
+            <p className="text-muted-foreground">No reviewers assigned yet.</p>
+          )}
+          {submission.reviewAssignments.map((a) => (
+            <div key={a.id} className="space-y-1 rounded-md border p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-medium">{a.reviewer.email}</span>
+                {a.review?.submittedAt ? (
+                  <>
+                    <Badge>Score: {a.review.score}</Badge>
+                    {a.review.recommendation && (
+                      <Badge variant="secondary">
+                        {DECISION_LABELS[a.review.recommendation]}
+                      </Badge>
+                    )}
+                  </>
+                ) : (
+                  <Badge variant="outline">Pending</Badge>
+                )}
+              </div>
+              {a.review?.commentsForAuthor && (
+                <p className="whitespace-pre-wrap text-muted-foreground">
+                  <span className="font-medium text-foreground">For author: </span>
+                  {a.review.commentsForAuthor}
+                </p>
+              )}
+              {a.review?.commentsForChair && (
+                <p className="whitespace-pre-wrap text-muted-foreground">
+                  <span className="font-medium text-foreground">Confidential: </span>
+                  {a.review.commentsForChair}
+                </p>
+              )}
             </div>
           ))}
         </CardContent>

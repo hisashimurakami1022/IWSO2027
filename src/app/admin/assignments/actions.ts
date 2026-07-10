@@ -6,6 +6,7 @@ import { requireChair } from "@/lib/session";
 import { getConferenceSettings } from "@/lib/settings";
 import { sendNotification } from "@/lib/notifications";
 import { ReviewerAssignedEmail } from "@/emails/reviewer-assigned";
+import { ReviewReminderEmail } from "@/emails/review-reminder";
 
 const REVIEWERS_PER_SUBMISSION = 2;
 
@@ -128,4 +129,33 @@ export async function autoAssignAction() {
 
   revalidatePath("/admin/assignments");
   return { assignedCount };
+}
+
+export async function sendReviewRemindersAction() {
+  await requireChair();
+
+  const pendingAssignments = await prisma.reviewAssignment.findMany({
+    where: { review: null },
+    include: { reviewer: true, submission: true },
+  });
+
+  const settings = await getConferenceSettings();
+  let sentCount = 0;
+
+  for (const assignment of pendingAssignments) {
+    await sendNotification({
+      to: assignment.reviewer.email,
+      subject: `[${settings.conferenceName}] Reminder: review pending`,
+      type: "REVIEW_REMINDER",
+      userId: assignment.reviewerId,
+      submissionId: assignment.submissionId,
+      react: ReviewReminderEmail({
+        title: assignment.submission.title,
+        conferenceName: settings.conferenceName,
+      }),
+    });
+    sentCount += 1;
+  }
+
+  return { sentCount };
 }

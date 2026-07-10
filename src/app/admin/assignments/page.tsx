@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AutoAssignButton } from "./auto-assign-button";
 import { AssignReviewerForm } from "./assign-reviewer-form";
 import { RemoveAssignmentButton } from "./remove-assignment-button";
+import { SendRemindersButton } from "./send-reminders-button";
 import { SUBMISSION_STATUS_LABELS } from "@/lib/labels";
 
 export default async function AssignmentsPage() {
@@ -13,7 +14,7 @@ export default async function AssignmentsPage() {
       include: {
         track: true,
         authors: true,
-        reviewAssignments: { include: { reviewer: true } },
+        reviewAssignments: { include: { reviewer: true, review: true } },
       },
       orderBy: { createdAt: "desc" },
     }),
@@ -27,7 +28,10 @@ export default async function AssignmentsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Review Assignments</h1>
-        <AutoAssignButton />
+        <div className="flex gap-2">
+          <SendRemindersButton />
+          <AutoAssignButton />
+        </div>
       </div>
 
       {submissions.length === 0 ? (
@@ -64,7 +68,12 @@ export default async function AssignmentsPage() {
                     <div className="space-y-1">
                       {s.reviewAssignments.map((a) => (
                         <div key={a.id} className="flex items-center justify-between text-sm">
-                          <span>{a.reviewer.email}</span>
+                          <span className="flex items-center gap-2">
+                            {a.reviewer.email}
+                            <Badge variant={a.review?.submittedAt ? "default" : "outline"}>
+                              {a.review?.submittedAt ? "Reviewed" : "Pending"}
+                            </Badge>
+                          </span>
                           <RemoveAssignmentButton assignmentId={a.id} />
                         </div>
                       ))}
