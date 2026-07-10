@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SUBMISSION_STATUS_LABELS, PRESENTATION_TYPE_LABELS, DECISION_LABELS } from "@/lib/labels";
+import { DecisionButtons } from "./decision-buttons";
 
 export default async function AdminSubmissionDetailPage({
   params,
@@ -25,17 +26,36 @@ export default async function AdminSubmissionDetailPage({
     notFound();
   }
 
+  const submittedScores = submission.reviewAssignments
+    .map((a) => a.review?.score)
+    .filter((s): s is number => typeof s === "number");
+  const averageScore =
+    submittedScores.length > 0
+      ? (submittedScores.reduce((sum, s) => sum + s, 0) / submittedScores.length).toFixed(1)
+      : null;
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">{submission.title}</h1>
         <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           <Badge>{SUBMISSION_STATUS_LABELS[submission.status]}</Badge>
+          {submission.decision && (
+            <Badge variant={submission.decision === "ACCEPT" ? "default" : "destructive"}>
+              {DECISION_LABELS[submission.decision]}
+            </Badge>
+          )}
           <span>{submission.track.name}</span>
           <span>&middot;</span>
           <span>{PRESENTATION_TYPE_LABELS[submission.presentationType]}</span>
           <span>&middot;</span>
           <span>Submitted by {submission.submitter.email}</span>
+          {averageScore && (
+            <>
+              <span>&middot;</span>
+              <span>Avg. score {averageScore}</span>
+            </>
+          )}
         </div>
       </div>
 
@@ -129,6 +149,19 @@ export default async function AdminSubmissionDetailPage({
               )}
             </div>
           ))}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Decision</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <DecisionButtons submissionId={submission.id} currentDecision={submission.decision} />
+          <p className="text-sm text-muted-foreground">
+            Setting a decision moves this submission to &quot;Decided&quot;. Send the notification
+            email from the Decisions page.
+          </p>
         </CardContent>
       </Card>
     </div>

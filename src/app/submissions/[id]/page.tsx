@@ -5,7 +5,7 @@ import { SubmissionForm } from "@/components/submission-form";
 import { WithdrawSubmissionButton } from "@/components/withdraw-submission-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { SUBMISSION_STATUS_LABELS } from "@/lib/labels";
+import { SUBMISSION_STATUS_LABELS, DECISION_LABELS } from "@/lib/labels";
 
 export default async function SubmissionDetailPage({
   params,
@@ -18,7 +18,11 @@ export default async function SubmissionDetailPage({
   const [submission, tracks] = await Promise.all([
     prisma.submission.findUnique({
       where: { id },
-      include: { authors: { orderBy: { order: "asc" } }, file: true },
+      include: {
+        authors: { orderBy: { order: "asc" } },
+        file: true,
+        reviews: true,
+      },
     }),
     prisma.track.findMany({ orderBy: { name: "asc" } }),
   ]);
@@ -34,7 +38,14 @@ export default async function SubmissionDetailPage({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">{submission.title}</h1>
-          <Badge className="mt-2">{SUBMISSION_STATUS_LABELS[submission.status]}</Badge>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Badge>{SUBMISSION_STATUS_LABELS[submission.status]}</Badge>
+            {submission.decision && (
+              <Badge variant={submission.decision === "ACCEPT" ? "default" : "destructive"}>
+                {DECISION_LABELS[submission.decision]}
+              </Badge>
+            )}
+          </div>
         </div>
         {editable && <WithdrawSubmissionButton id={submission.id} />}
       </div>
@@ -78,6 +89,18 @@ export default async function SubmissionDetailPage({
               </a>
             ) : (
               <p className="text-muted-foreground">No abstract file uploaded.</p>
+            )}
+            {submission.status === "DECIDED" && (
+              <div className="space-y-2 border-t pt-4">
+                {submission.reviews
+                  .map((r) => r.commentsForAuthor)
+                  .filter((c): c is string => !!c && c.trim().length > 0)
+                  .map((c, i) => (
+                    <p key={i} className="whitespace-pre-wrap text-muted-foreground">
+                      {c}
+                    </p>
+                  ))}
+              </div>
             )}
           </CardContent>
         </Card>

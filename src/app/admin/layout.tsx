@@ -5,6 +5,7 @@ const links = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/submissions", label: "Submissions" },
   { href: "/admin/assignments", label: "Assignments" },
+  { href: "/admin/decisions", label: "Decisions" },
   { href: "/admin/tracks", label: "Tracks" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/settings", label: "Settings" },
