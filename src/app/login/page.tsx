@@ -24,15 +24,16 @@ export default async function LoginPage({
     <div className="mx-auto flex max-w-md flex-col justify-center px-4 py-24">
       <Card>
         <CardHeader>
-          <CardTitle>ログイン</CardTitle>
+          <CardTitle>Sign in</CardTitle>
           <CardDescription>
-            メールアドレスを入力すると、ログイン用のリンクをお送りします。投稿者・査読者・運営のいずれも同じ方法でログインできます。
+            Enter your email address and we&apos;ll send you a sign-in link. Authors, reviewers,
+            and organizers all sign in the same way.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form action={login} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">メールアドレス</Label>
+              <Label htmlFor="email">Email address</Label>
               <Input
                 id="email"
                 name="email"
@@ -43,7 +44,7 @@ export default async function LoginPage({
               />
             </div>
             <Button type="submit" className="w-full">
-              ログインリンクを送信
+              Send sign-in link
             </Button>
           </form>
         </CardContent>

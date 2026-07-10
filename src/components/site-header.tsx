@@ -16,22 +16,22 @@ export async function SiteHeader() {
 
         <nav className="flex items-center gap-4 text-sm">
           <Link href="/program" className="text-muted-foreground hover:text-foreground">
-            プログラム
+            Program
           </Link>
 
           {user && (
             <>
               <Link href="/submissions" className="text-muted-foreground hover:text-foreground">
-                投稿
+                Submissions
               </Link>
               {(roles.includes("REVIEWER") || roles.includes("CHAIR")) && (
                 <Link href="/review" className="text-muted-foreground hover:text-foreground">
-                  査読
+                  Review
                 </Link>
               )}
               {roles.includes("CHAIR") && (
                 <Link href="/admin" className="text-muted-foreground hover:text-foreground">
-                  管理
+                  Admin
                 </Link>
               )}
             </>
@@ -47,12 +47,12 @@ export async function SiteHeader() {
                 }}
               >
                 <Button type="submit" variant="outline" size="sm">
-                  ログアウト
+                  Sign out
                 </Button>
               </form>
             </div>
           ) : (
-            <Button size="sm" nativeButton={false} render={<Link href="/login">ログイン</Link>} />
+            <Button size="sm" nativeButton={false} render={<Link href="/login">Sign in</Link>} />
           )}
         </nav>
       </div>

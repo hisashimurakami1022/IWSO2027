@@ -15,20 +15,22 @@ export default async function NewSubmissionPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-8">
       <div>
-        <h1 className="text-2xl font-semibold">Abstractを投稿</h1>
-        <p className="text-muted-foreground">下書き保存後も投稿締切まで編集できます。</p>
+        <h1 className="text-2xl font-semibold">Submit an Abstract</h1>
+        <p className="text-muted-foreground">
+          You can keep editing after saving a draft, until the submission deadline.
+        </p>
       </div>
 
       {!open && (
         <Alert variant="destructive">
-          <AlertTitle>投稿締切を過ぎています</AlertTitle>
-          <AlertDescription>新規投稿の受付は終了しました。</AlertDescription>
+          <AlertTitle>Submission deadline has passed</AlertTitle>
+          <AlertDescription>New submissions are no longer being accepted.</AlertDescription>
         </Alert>
       )}
 
       <Card>
         <CardHeader>
-          <CardTitle>投稿内容</CardTitle>
+          <CardTitle>Submission Details</CardTitle>
         </CardHeader>
         <CardContent>
           <SubmissionForm

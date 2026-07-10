@@ -1,4 +1,4 @@
-// IWSO 2027 投稿・査読・プログラム管理システム データモデル
+// IWSO 2027 Submission, Review & Program Management System — Data Model
 
 generator client {
   provider = "prisma-client"
@@ -49,7 +49,7 @@ enum NotificationType {
   PROGRAM_PUBLISHED
 }
 
-// --- Auth.js (NextAuth) 必須モデル ---
+// --- Auth.js (NextAuth) required models ---
 
 model User {
   id            String    @id @default(cuid())
@@ -107,7 +107,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// --- 会議マスタ ---
+// --- Conference master data ---
 
 model Track {
   id          String   @id @default(cuid())
@@ -142,7 +142,7 @@ model ConferenceSettings {
   updatedAt          DateTime  @updatedAt
 }
 
-// --- 投稿 ---
+// --- Submissions ---
 
 model Submission {
   id               String           @id @default(cuid())
@@ -181,7 +181,7 @@ model SubmissionAuthor {
   submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 }
 
-// --- 査読 ---
+// --- Review ---
 
 model ReviewAssignment {
   id           String   @id @default(cuid())
@@ -215,7 +215,7 @@ model Review {
   reviewer   User             @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
 }
 
-// --- プログラム編成 ---
+// --- Program ---
 
 model ProgramSession {
   id        String             @id @default(cuid())
@@ -243,7 +243,7 @@ model ProgramSessionSubmission {
   @@unique([sessionId, submissionId])
 }
 
-// --- 通知 ---
+// --- Notifications ---
 
 model NotificationLog {
   id           String           @id @default(cuid())

@@ -5,13 +5,15 @@ export default function VerifyRequestPage() {
     <div className="mx-auto flex max-w-md flex-col justify-center px-4 py-24">
       <Card>
         <CardHeader>
-          <CardTitle>メールを確認してください</CardTitle>
+          <CardTitle>Check your email</CardTitle>
           <CardDescription>
-            ログイン用のリンクを記載したメールを送信しました。メール内のリンクをクリックしてログインを完了してください。
+            We&apos;ve sent you a sign-in link. Click the link in the email to complete your
+            sign-in.
           </CardDescription>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          メールが届かない場合は、迷惑メールフォルダをご確認いただくか、しばらく待ってから再度お試しください。
+          If you don&apos;t see the email, please check your spam folder or wait a moment and try
+          again.
         </CardContent>
       </Card>
     </div>

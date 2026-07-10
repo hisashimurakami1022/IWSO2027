@@ -26,20 +26,21 @@ export function WithdrawSubmissionButton({ id }: { id: string }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button variant="destructive">取り下げる</Button>} />
+      <DialogTrigger render={<Button variant="destructive">Withdraw</Button>} />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>投稿を取り下げますか?</DialogTitle>
+          <DialogTitle>Withdraw this submission?</DialogTitle>
           <DialogDescription>
-            取り下げた投稿は再度編集・提出できません。この操作は元に戻せません。
+            A withdrawn submission can no longer be edited or resubmitted. This action cannot be
+            undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
-            キャンセル
+            Cancel
           </Button>
           <Button variant="destructive" onClick={handleConfirm} disabled={isPending}>
-            {isPending ? "処理中..." : "取り下げる"}
+            {isPending ? "Processing..." : "Withdraw"}
           </Button>
         </DialogFooter>
       </DialogContent>

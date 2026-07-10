@@ -93,7 +93,7 @@ export function SubmissionForm({
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="title">タイトル</Label>
+        <Label htmlFor="title">Title</Label>
         <Input id="title" name="title" required maxLength={300} defaultValue={defaultValues?.title} />
         {state.errors?.title && (
           <p className="text-sm text-destructive">{state.errors.title[0]}</p>
@@ -102,10 +102,10 @@ export function SubmissionForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="trackId">トラック</Label>
+          <Label htmlFor="trackId">Track</Label>
           <Select name="trackId" defaultValue={defaultValues?.trackId}>
             <SelectTrigger id="trackId" className="w-full">
-              <SelectValue placeholder="トラックを選択" />
+              <SelectValue placeholder="Select a track" />
             </SelectTrigger>
             <SelectContent>
               {tracks.map((t) => (
@@ -121,7 +121,7 @@ export function SubmissionForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="presentationType">発表形式</Label>
+          <Label htmlFor="presentationType">Presentation Type</Label>
           <Select name="presentationType" defaultValue={defaultValues?.presentationType ?? "ORAL"}>
             <SelectTrigger id="presentationType" className="w-full">
               <SelectValue />
@@ -138,7 +138,7 @@ export function SubmissionForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="abstractText">Abstract本文</Label>
+        <Label htmlFor="abstractText">Abstract</Label>
         <Textarea
           id="abstractText"
           name="abstractText"
@@ -153,7 +153,7 @@ export function SubmissionForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="keywordInput">キーワード(最大10個)</Label>
+        <Label htmlFor="keywordInput">Keywords (up to 10)</Label>
         <div className="flex gap-2">
           <Input
             id="keywordInput"
@@ -165,10 +165,10 @@ export function SubmissionForm({
                 addKeyword();
               }
             }}
-            placeholder="キーワードを入力してEnter"
+            placeholder="Type a keyword and press Enter"
           />
           <Button type="button" variant="outline" onClick={addKeyword}>
-            追加
+            Add
           </Button>
         </div>
         {keywords.length > 0 && (
@@ -180,7 +180,7 @@ export function SubmissionForm({
                   type="button"
                   onClick={() => removeKeyword(kw)}
                   className="ml-1 text-muted-foreground hover:text-foreground"
-                  aria-label={`${kw}を削除`}
+                  aria-label={`Remove ${kw}`}
                 >
                   ×
                 </button>
@@ -192,9 +192,9 @@ export function SubmissionForm({
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label>著者</Label>
+          <Label>Authors</Label>
           <Button type="button" variant="outline" size="sm" onClick={addAuthor}>
-            + 著者を追加
+            + Add Author
           </Button>
         </div>
         {state.errors?.authors && (
@@ -204,20 +204,20 @@ export function SubmissionForm({
           {authors.map((author, index) => (
             <div key={index} className="grid gap-2 rounded-md border p-3 sm:grid-cols-[1fr_1fr_1fr_auto_auto]">
               <Input
-                placeholder="氏名"
+                placeholder="Name"
                 value={author.name}
                 onChange={(e) => updateAuthor(index, { name: e.target.value })}
                 required
               />
               <Input
-                placeholder="メールアドレス"
+                placeholder="Email"
                 type="email"
                 value={author.email}
                 onChange={(e) => updateAuthor(index, { email: e.target.value })}
                 required
               />
               <Input
-                placeholder="所属"
+                placeholder="Affiliation"
                 value={author.affiliation}
                 onChange={(e) => updateAuthor(index, { affiliation: e.target.value })}
               />
@@ -228,7 +228,7 @@ export function SubmissionForm({
                     updateAuthor(index, { isCorresponding: checked === true })
                   }
                 />
-                連絡著者
+                Corresponding
               </label>
               <Button
                 type="button"
@@ -237,7 +237,7 @@ export function SubmissionForm({
                 disabled={authors.length <= 1}
                 onClick={() => removeAuthor(index)}
               >
-                削除
+                Remove
               </Button>
             </div>
           ))}
@@ -246,10 +246,10 @@ export function SubmissionForm({
 
       <div className="flex gap-3 pt-2">
         <Button type="submit" name="intent" value="draft" variant="outline" disabled={isPending}>
-          下書き保存
+          Save Draft
         </Button>
         <Button type="submit" name="intent" value="submit" disabled={isPending}>
-          投稿する
+          Submit
         </Button>
       </div>
     </form>

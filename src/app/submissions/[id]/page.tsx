@@ -42,7 +42,7 @@ export default async function SubmissionDetailPage({
       {editable ? (
         <Card>
           <CardHeader>
-            <CardTitle>投稿内容の編集</CardTitle>
+            <CardTitle>Edit Submission</CardTitle>
           </CardHeader>
           <CardContent>
             <SubmissionForm

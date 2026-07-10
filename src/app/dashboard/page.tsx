@@ -11,11 +11,11 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
       <div>
-        <h1 className="text-2xl font-semibold">ダッシュボード</h1>
+        <h1 className="text-2xl font-semibold">Dashboard</h1>
         <p className="text-muted-foreground">
-          {user.name ?? user.email} さん
+          {user.name ?? user.email}
           {user.roles.length > 0 && (
-            <> ・ {user.roles.map((r) => ROLE_LABELS[r]).join(" / ")}</>
+            <> &middot; {user.roles.map((r) => ROLE_LABELS[r]).join(" / ")}</>
           )}
         </p>
       </div>
@@ -23,12 +23,12 @@ export default async function DashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>投稿</CardTitle>
-            <CardDescription>Abstractの投稿・編集・取下げ</CardDescription>
+            <CardTitle>Submissions</CardTitle>
+            <CardDescription>Submit, edit, or withdraw your abstracts</CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/submissions" className="text-sm underline underline-offset-4">
-              投稿一覧を見る
+              View submissions
             </Link>
           </CardContent>
         </Card>
@@ -36,12 +36,12 @@ export default async function DashboardPage() {
         {isReviewer && (
           <Card>
             <CardHeader>
-              <CardTitle>査読</CardTitle>
-              <CardDescription>割り当てられた投稿の査読</CardDescription>
+              <CardTitle>Review</CardTitle>
+              <CardDescription>Review your assigned submissions</CardDescription>
             </CardHeader>
             <CardContent>
               <Link href="/review" className="text-sm underline underline-offset-4">
-                査読一覧を見る
+                View review queue
               </Link>
             </CardContent>
           </Card>
@@ -50,12 +50,12 @@ export default async function DashboardPage() {
         {isChair && (
           <Card>
             <CardHeader>
-              <CardTitle>管理</CardTitle>
-              <CardDescription>投稿・査読・プログラムの管理</CardDescription>
+              <CardTitle>Admin</CardTitle>
+              <CardDescription>Manage submissions, reviews, and the program</CardDescription>
             </CardHeader>
             <CardContent>
               <Link href="/admin" className="text-sm underline underline-offset-4">
-                管理画面を開く
+                Open admin panel
               </Link>
             </CardContent>
           </Card>

@@ -48,17 +48,17 @@ export async function saveSubmissionAction(
 
   const open = await isSubmissionOpen();
   if (!open) {
-    return { message: "投稿締切を過ぎているため、保存できません。" };
+    return { message: "The submission deadline has passed, so this cannot be saved." };
   }
 
   let existing = null;
   if (id) {
     existing = await prisma.submission.findUnique({ where: { id } });
     if (!existing || existing.submitterId !== user.id) {
-      return { message: "投稿が見つかりません。" };
+      return { message: "Submission not found." };
     }
     if (existing.status !== "DRAFT" && existing.status !== "SUBMITTED") {
-      return { message: "この投稿は既に編集できない状態です。" };
+      return { message: "This submission can no longer be edited." };
     }
   }
 
@@ -115,7 +115,7 @@ export async function saveSubmissionAction(
     const settings = await getConferenceSettings();
     await sendNotification({
       to: user.email,
-      subject: `[${settings.conferenceName}] 投稿を受け付けました`,
+      subject: `[${settings.conferenceName}] Submission received`,
       type: "SUBMISSION_CONFIRMATION",
       userId: user.id,
       submissionId: submission.id,
@@ -134,10 +134,10 @@ export async function withdrawSubmissionAction(id: string) {
   const user = await requireUser();
   const submission = await prisma.submission.findUnique({ where: { id } });
   if (!submission || submission.submitterId !== user.id) {
-    throw new Error("投稿が見つかりません。");
+    throw new Error("Submission not found.");
   }
   if (submission.status === "DECIDED" || submission.status === "WITHDRAWN") {
-    throw new Error("この投稿は取下げできません。");
+    throw new Error("This submission cannot be withdrawn.");
   }
   await prisma.submission.update({
     where: { id },

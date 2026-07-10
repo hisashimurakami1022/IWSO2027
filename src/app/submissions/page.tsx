@@ -26,16 +26,16 @@ export default async function SubmissionsPage() {
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">投稿一覧</h1>
-          <p className="text-muted-foreground">あなたが投稿したAbstract一覧です。</p>
+          <h1 className="text-2xl font-semibold">Submissions</h1>
+          <p className="text-muted-foreground">Abstracts you have submitted.</p>
         </div>
-        <Button render={<Link href="/submissions/new">新規投稿</Link>} />
+        <Button nativeButton={false} render={<Link href="/submissions/new">New Submission</Link>} />
       </div>
 
       {submissions.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-muted-foreground">
-            まだ投稿がありません。
+            No submissions yet.
           </CardContent>
         </Card>
       ) : (
@@ -49,7 +49,7 @@ export default async function SubmissionsPage() {
                   </Link>
                   <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                     <span>{s.track.name}</span>
-                    <span>・</span>
+                    <span>&middot;</span>
                     <span>{PRESENTATION_TYPE_LABELS[s.presentationType]}</span>
                   </div>
                 </div>

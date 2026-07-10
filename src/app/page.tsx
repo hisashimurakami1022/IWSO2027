@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { format } from "date-fns";
-import { ja } from "date-fns/locale";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { Button } from "@/components/ui/button";
@@ -18,29 +17,30 @@ export default async function Home() {
         <p className="text-sm font-medium text-muted-foreground">
           {settings?.conferenceName ?? "IWSO 2027"}
         </p>
-        <h1 className="text-4xl font-bold tracking-tight">Abstract投稿受付</h1>
+        <h1 className="text-4xl font-bold tracking-tight">Abstract Submission</h1>
         <p className="mx-auto max-w-2xl text-muted-foreground">
-          国際会議 IWSO 2027(2027年5月開催予定)のAbstract投稿・査読・プログラム編成を行うシステムです。
+          Submission, review, and program system for the IWSO 2027 international conference
+          (scheduled for May 2027).
         </p>
         <div className="flex justify-center gap-3 pt-2">
           {user ? (
             <Button
               size="lg"
               nativeButton={false}
-              render={<Link href="/submissions/new">Abstractを投稿する</Link>}
+              render={<Link href="/submissions/new">Submit an Abstract</Link>}
             />
           ) : (
             <Button
               size="lg"
               nativeButton={false}
-              render={<Link href="/login">ログインして投稿を始める</Link>}
+              render={<Link href="/login">Sign in to submit</Link>}
             />
           )}
           <Button
             variant="outline"
             size="lg"
             nativeButton={false}
-            render={<Link href="/program">プログラムを見る</Link>}
+            render={<Link href="/program">View Program</Link>}
           />
         </div>
       </section>
@@ -48,32 +48,32 @@ export default async function Home() {
       <section className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">投稿締切</CardTitle>
+            <CardTitle className="text-base">Submission Deadline</CardTitle>
           </CardHeader>
           <CardContent className="text-lg font-semibold">
             {settings?.submissionDeadline
-              ? format(settings.submissionDeadline, "yyyy年M月d日(E) HH:mm", { locale: ja })
-              : "未定"}
+              ? format(settings.submissionDeadline, "MMM d, yyyy (EEE) HH:mm")
+              : "TBD"}
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">査読締切</CardTitle>
+            <CardTitle className="text-base">Review Deadline</CardTitle>
           </CardHeader>
           <CardContent className="text-lg font-semibold">
             {settings?.reviewDeadline
-              ? format(settings.reviewDeadline, "yyyy年M月d日(E) HH:mm", { locale: ja })
-              : "未定"}
+              ? format(settings.reviewDeadline, "MMM d, yyyy (EEE) HH:mm")
+              : "TBD"}
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">採否通知</CardTitle>
+            <CardTitle className="text-base">Notification Date</CardTitle>
           </CardHeader>
           <CardContent className="text-lg font-semibold">
             {settings?.notificationDate
-              ? format(settings.notificationDate, "yyyy年M月d日(E)", { locale: ja })
-              : "未定"}
+              ? format(settings.notificationDate, "MMM d, yyyy (EEE)")
+              : "TBD"}
           </CardContent>
         </Card>
       </section>

@@ -23,7 +23,7 @@ async function main() {
     create: {
       code: "GENERAL",
       name: "General",
-      description: "分野未分類の一般トラック",
+      description: "General, uncategorized track",
     },
   });
   console.log("Ensured default Track");
