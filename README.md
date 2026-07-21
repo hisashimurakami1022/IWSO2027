@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# IWSO 2027 Submission System
 
-## Getting Started
+Abstract submission, peer review, decision, and program-scheduling system for the IWSO 2027 international conference (May 2027).
 
-First, run the development server:
+## Tech stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- [Next.js 16](https://nextjs.org) (App Router, Turbopack)
+- [Prisma 6](https://www.prisma.io) + PostgreSQL
+- [Auth.js v5](https://authjs.dev) — email magic-link sign-in via [Resend](https://resend.com)
+- [shadcn/ui](https://ui.shadcn.com) (base-ui variant) + Tailwind CSS v4
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Roles
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Author** (any signed-in user) — submit an abstract (PDF) with title/authors/affiliations as text, edit or withdraw until the submission deadline, view decision once made.
+- **Reviewer** — see only the submissions assigned to them, score (1-5), recommend Accept/Reject, leave comments for the author and confidential notes for the chair.
+- **Chair** (admin) — manage tracks, deadlines, users/roles, assign reviewers (manual or auto), finalize decisions, send notifications, and build the program.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Local development
 
-## Learn More
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Copy `.env.example` to `.env` and fill in the values (see below).
+3. Apply the database schema:
+   ```bash
+   npx prisma migrate deploy
+   ```
+4. Seed the initial conference settings, a default track, and a Chair account:
+   ```bash
+   npx prisma db seed
+   ```
+   Edit `prisma/seed.ts` to change the seeded Chair email before running.
+5. Start the dev server:
+   ```bash
+   npm run dev
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+### Environment variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+See `.env.example`. You will need:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `DATABASE_URL` — a PostgreSQL connection string (Neon recommended for production).
+- `AUTH_SECRET` — random secret for Auth.js session signing.
+- `AUTH_RESEND_KEY` — Resend API key, used for both magic-link sign-in and all notification emails.
+- `EMAIL_FROM` — sender address. The Resend sandbox address (`onboarding@resend.dev`) only delivers to the email you signed up to Resend with; verify a custom domain in Resend to send to real recipients.
+- `NEXT_PUBLIC_APP_URL` / `AUTH_URL` — the app's public URL.
 
-## Deploy on Vercel
+## Deploying
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. **Database**: create a production PostgreSQL database (e.g. on [Neon](https://neon.tech)) and set `DATABASE_URL`. Run `npx prisma migrate deploy` against it, then `npx prisma db seed` to bootstrap the initial Chair account, default track, and conference settings.
+2. **Email**: create a [Resend](https://resend.com) account, verify your sending domain, and set `AUTH_RESEND_KEY` / `EMAIL_FROM` accordingly.
+3. **App**: deploy to [Vercel](https://vercel.com) (or any Next.js host) with the environment variables above configured. Update `AUTH_URL` / `NEXT_PUBLIC_APP_URL` to the production URL.
+4. Once deployed, sign in as the seeded Chair account and use **Admin → Users** to grant Reviewer/Chair access to other organizers and reviewers, **Admin → Tracks** to set up real tracks, and **Admin → Settings** to set the actual conference deadlines.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Notable implementation notes
+
+- Abstract files (PDF) are stored as bytes directly in Postgres rather than a separate blob store, since file sizes are expected to stay small at this conference's scale.
+- All notification emails (submission confirmation, reviewer assignment, review reminders, decisions) are sent best-effort — a failed send is logged to the console but never blocks the underlying action.
+- The public program page (`/program`) requires no authentication; everything else requires sign-in, with `/admin/*` restricted to Chair and `/review/*` restricted to Reviewer/Chair.

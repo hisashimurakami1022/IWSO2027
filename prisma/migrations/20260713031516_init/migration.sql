@@ -1,3 +1,6 @@
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
+
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('REVIEWER', 'CHAIR');
 
@@ -103,7 +106,6 @@ CREATE TABLE "ConferenceSettings" (
 CREATE TABLE "Submission" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
-    "abstractText" TEXT NOT NULL,
     "keywords" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "presentationType" "PresentationType" NOT NULL DEFAULT 'ORAL',
     "status" "SubmissionStatus" NOT NULL DEFAULT 'DRAFT',
@@ -130,6 +132,19 @@ CREATE TABLE "SubmissionAuthor" (
     "isCorresponding" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "SubmissionAuthor_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "SubmissionFile" (
+    "id" TEXT NOT NULL,
+    "submissionId" TEXT NOT NULL,
+    "fileName" TEXT NOT NULL,
+    "mimeType" TEXT NOT NULL,
+    "size" INTEGER NOT NULL,
+    "data" BYTEA NOT NULL,
+    "uploadedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "SubmissionFile_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -219,6 +234,9 @@ CREATE UNIQUE INDEX "Track_code_key" ON "Track"("code");
 CREATE UNIQUE INDEX "ReviewerExpertise_reviewerId_trackId_key" ON "ReviewerExpertise"("reviewerId", "trackId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "SubmissionFile_submissionId_key" ON "SubmissionFile"("submissionId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "ReviewAssignment_submissionId_reviewerId_key" ON "ReviewAssignment"("submissionId", "reviewerId");
 
 -- CreateIndex
@@ -249,6 +267,9 @@ ALTER TABLE "Submission" ADD CONSTRAINT "Submission_submitterId_fkey" FOREIGN KE
 ALTER TABLE "SubmissionAuthor" ADD CONSTRAINT "SubmissionAuthor_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "Submission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "SubmissionFile" ADD CONSTRAINT "SubmissionFile_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "Submission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "ReviewAssignment" ADD CONSTRAINT "ReviewAssignment_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "Submission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -277,3 +298,4 @@ ALTER TABLE "NotificationLog" ADD CONSTRAINT "NotificationLog_userId_fkey" FOREI
 
 -- AddForeignKey
 ALTER TABLE "NotificationLog" ADD CONSTRAINT "NotificationLog_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "Submission"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
