@@ -77,9 +77,9 @@ npm run build
 
 On a ~1GB-RAM plan (a common Sakura VPS entry tier), `next build` can crash with `JavaScript heap
 out of memory`, because V8 sizes its default heap based on physical RAM and doesn't account for
-swap. Two things fix this:
+swap. Two things are needed:
 
-1. Add swap if you don't already have a few GB of it:
+1. **Add swap** if you don't already have a few GB of it:
    ```bash
    sudo fallocate -l 3G /swapfile2
    sudo chmod 600 /swapfile2
@@ -87,9 +87,16 @@ swap. Two things fix this:
    sudo swapon /swapfile2
    echo '/swapfile2 none swap sw 0 0' | sudo tee -a /etc/fstab
    ```
-2. The `build` script already sets `NODE_OPTIONS=--max-old-space-size=3072` (via `cross-env`) so
-   V8 is explicitly allowed to grow into that swap — this is already handled, just make sure step
-   1's swap is in place first.
+2. **Raise V8's heap ceiling** so it's willing to grow into that swap. This has to be set with a
+   shell `export` (not a `cross-env`/inline prefix on just the `next build` invocation) — Turbopack
+   spawns its own worker processes, and in testing they only picked up `NODE_OPTIONS` when it was
+   present in the environment *before* `npm` itself started, not when set only on `next build`'s
+   immediate environment. Add it to your shell profile so it's always set:
+   ```bash
+   echo 'export NODE_OPTIONS="--max-old-space-size=3072"' >> ~/.bashrc
+   source ~/.bashrc
+   ```
+   Then `npm run build` (and every future rebuild in step 8) will pick it up automatically.
 
 ### `.env` values for production
 
