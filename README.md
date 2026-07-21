@@ -50,7 +50,7 @@ See `.env.example`. You will need:
 
 1. **Database**: create a production PostgreSQL database (e.g. on [Neon](https://neon.tech)) and set `DATABASE_URL`. Run `npx prisma migrate deploy` against it, then `npx prisma db seed` to bootstrap the initial Chair account, default track, and conference settings.
 2. **Email**: create a [Resend](https://resend.com) account, verify your sending domain, and set `AUTH_RESEND_KEY` / `EMAIL_FROM` accordingly.
-3. **App**: deploy to [Vercel](https://vercel.com) (or any Next.js host) with the environment variables above configured. Update `AUTH_URL` / `NEXT_PUBLIC_APP_URL` to the production URL.
+3. **App**: deploy to [Vercel](https://vercel.com) (or any Next.js host) with the environment variables above configured. Update `AUTH_URL` / `NEXT_PUBLIC_APP_URL` to the production URL. To self-host instead (e.g. on a Sakura VPS), see [DEPLOY.md](./DEPLOY.md) — the app has no Vercel-specific dependencies.
 4. Once deployed, sign in as the seeded Chair account and use **Admin → Users** to grant Reviewer/Chair access to other organizers and reviewers, **Admin → Tracks** to set up real tracks, and **Admin → Settings** to set the actual conference deadlines.
 
 ## Notable implementation notes

@@ -1,0 +1,52 @@
+# nginx reverse proxy for the IWSO 2027 submission system.
+# Copy to /etc/nginx/sites-available/iwso, symlink into sites-enabled,
+# replace `your-domain.example` below, then run `certbot --nginx` to
+# fill in the SSL block. See DEPLOY.md.
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name your-domain.example;
+
+    # Allow Let's Encrypt HTTP-01 challenge before SSL is set up.
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name your-domain.example;
+
+    # Filled in by `certbot --nginx` (or set manually if using another
+    # certificate source).
+    # ssl_certificate     /etc/letsencrypt/live/your-domain.example/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/your-domain.example/privkey.pem;
+
+    # Abstract PDFs can be up to 10MB; leave headroom for multipart overhead.
+    client_max_body_size 15m;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Required for Next.js streaming responses.
+        proxy_buffering off;
+        proxy_set_header X-Accel-Buffering no;
+
+        # Auth.js sign-in redirects and Server Actions can be slow on
+        # first compile; keep the proxy from timing out too eagerly.
+        proxy_read_timeout 60s;
+    }
+}
