@@ -67,7 +67,7 @@ For updates later, `git pull` in this directory and re-run steps 4 and 6.
 ## 4. Install and build
 
 ```bash
-npm install
+npm install   # also runs `prisma generate` via postinstall
 cp .env.example .env
 nano .env   # fill in real values — see below
 npm run build
