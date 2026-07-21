@@ -73,6 +73,24 @@ nano .env   # fill in real values — see below
 npm run build
 ```
 
+### Low-memory VPS (≤1GB RAM)
+
+On a ~1GB-RAM plan (a common Sakura VPS entry tier), `next build` can crash with `JavaScript heap
+out of memory`, because V8 sizes its default heap based on physical RAM and doesn't account for
+swap. Two things fix this:
+
+1. Add swap if you don't already have a few GB of it:
+   ```bash
+   sudo fallocate -l 3G /swapfile2
+   sudo chmod 600 /swapfile2
+   sudo mkswap /swapfile2
+   sudo swapon /swapfile2
+   echo '/swapfile2 none swap sw 0 0' | sudo tee -a /etc/fstab
+   ```
+2. The `build` script already sets `NODE_OPTIONS=--max-old-space-size=3072` (via `cross-env`) so
+   V8 is explicitly allowed to grow into that swap — this is already handled, just make sure step
+   1's swap is in place first.
+
 ### `.env` values for production
 
 - `DATABASE_URL` — your Neon connection string (same one used in development).
