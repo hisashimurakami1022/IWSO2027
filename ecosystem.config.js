@@ -11,7 +11,9 @@ module.exports = {
     {
       name: "iwso-submission-system",
       script: "node_modules/next/dist/bin/next",
-      args: "start -p 3000",
+      // Port 3001: pick a port that isn't already used by another app on the
+      // same VPS (check with `pm2 status` / `sudo ss -ltnp` before deploying).
+      args: "start -p 3001",
       cwd: __dirname,
       instances: 1,
       exec_mode: "fork",

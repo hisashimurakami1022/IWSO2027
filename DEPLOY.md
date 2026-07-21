@@ -118,13 +118,18 @@ npx prisma db seed   # only on first deploy — edit prisma/seed.ts first if the
 
 ## 6. Start the app with PM2
 
+`ecosystem.config.js` runs the app on port 3001 (not 3000), in case another app is already using
+3000 on the same VPS — check first with `pm2 status` / `sudo ss -ltnp | grep -E ':(3000|3001)'`
+and edit the `-p` port in `ecosystem.config.js` (and `proxy_pass` in your nginx config) if 3001 is
+also taken.
+
 ```bash
 pm2 start ecosystem.config.js
 pm2 save
 pm2 startup   # prints a command to run once so PM2 restarts the app after a server reboot — run it
 ```
 
-Check it's up: `curl http://127.0.0.1:3000` should return HTML, and `pm2 logs iwso-submission-system`
+Check it's up: `curl http://127.0.0.1:3001` should return HTML, and `pm2 logs iwso-submission-system`
 should show `Ready` with no errors.
 
 ## 7. nginx + SSL
