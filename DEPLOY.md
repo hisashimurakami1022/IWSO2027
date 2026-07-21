@@ -40,10 +40,25 @@ firewall alone won't be enough if Sakura's edge filter blocks it.
 
 ## 3. Get the code onto the server
 
+The repository is private, so the VPS needs its own credentials to clone it — generate a key
+**on the VPS** (don't reuse a key from your laptop) and register it as a read-only [deploy
+key](https://github.com/hisashimurakami1022/IWSO2027/settings/keys) on the GitHub repo:
+
 ```bash
+ssh-keygen -t ed25519 -C "iwso-vps" -f ~/.ssh/id_ed25519 -N ""
+cat ~/.ssh/id_ed25519.pub
+```
+
+Copy the printed public key, then on GitHub go to the repo → **Settings → Deploy keys → Add deploy
+key**, paste it in, and leave "Allow write access" unchecked (read-only is enough for deployment).
+
+Then:
+
+```bash
+ssh -T git@github.com   # first connection: type "yes" to trust GitHub's host key
 sudo mkdir -p /var/www/iwso
 sudo chown $USER:$USER /var/www/iwso
-git clone <your-repo-url> /var/www/iwso
+git clone git@github.com:hisashimurakami1022/IWSO2027.git /var/www/iwso
 cd /var/www/iwso
 ```
 
