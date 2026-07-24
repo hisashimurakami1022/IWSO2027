@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SUBMISSION_STATUS_LABELS, PRESENTATION_TYPE_LABELS, DECISION_LABELS } from "@/lib/labels";
 import { DecisionButtons } from "./decision-buttons";
+import { DeleteSubmissionButton } from "./delete-submission-button";
 
 export default async function AdminSubmissionDetailPage({
   params,
@@ -161,6 +162,19 @@ export default async function AdminSubmissionDetailPage({
           <p className="text-sm text-muted-foreground">
             Setting a decision moves this submission to &quot;Decided&quot;. Send the notification
             email from the Decisions page.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Danger zone</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <DeleteSubmissionButton submissionId={submission.id} />
+          <p className="text-sm text-muted-foreground">
+            Permanently deletes this submission and all related data (abstract file, authors,
+            review assignments, reviews). Use this to remove test/dummy submissions.
           </p>
         </CardContent>
       </Card>
