@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getCurrentUser } from "@/lib/session";
 import { signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,14 @@ export async function SiteHeader() {
   return (
     <header className="border-b bg-background">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link href="/" className="font-semibold tracking-tight">
+        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+          <Image
+            src="/images/iwso-logo.png"
+            alt="IWSO 12 logo"
+            width={32}
+            height={32}
+            className="rounded-full"
+          />
           IWSO 2027
         </Link>
 

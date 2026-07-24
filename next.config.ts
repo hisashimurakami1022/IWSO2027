@@ -6,6 +6,12 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "15mb",
     },
   },
+  // Next's built-in image optimizer (sharp) fails to read files when the
+  // project path contains non-ASCII characters (this repo's directory name
+  // is Japanese). Self-hosted without a CDN anyway, so skip optimization.
+  images: {
+    unoptimized: true,
+  },
   // Self-hosted behind nginx: disable proxy buffering so streaming responses
   // aren't held back. See DEPLOY.md.
   async headers() {
