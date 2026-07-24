@@ -33,10 +33,10 @@ export default async function Home() {
             priority
             className="drop-shadow-lg"
           />
-          <p className="text-sm font-medium text-white/80">
+          <h1 className="text-5xl font-bold tracking-tight sm:text-6xl">
             {settings?.conferenceName ?? "IWSO 2027"}
-          </p>
-          <h1 className="text-4xl font-bold tracking-tight">Abstract Submission</h1>
+          </h1>
+          <p className="text-lg font-medium text-white/85 sm:text-xl">Abstract Submission</p>
           <p className="mx-auto max-w-2xl text-white/85">
             Submission, review, and program system for the IWSO 2027 international conference,
             held in Fukuoka, Japan (scheduled for May 2027).
