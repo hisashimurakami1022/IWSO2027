@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireChair } from "@/lib/session";
-import type { Decision } from "@/generated/prisma/client";
+import type { Decision, PresentationCategory } from "@/generated/prisma/client";
 
 export async function setDecisionAction(submissionId: string, decision: Decision) {
   await requireChair();
@@ -14,6 +14,20 @@ export async function setDecisionAction(submissionId: string, decision: Decision
   });
   revalidatePath(`/admin/submissions/${submissionId}`);
   revalidatePath("/admin/decisions");
+}
+
+export async function setPresentationCategoryAction(
+  submissionId: string,
+  presentationCategory: PresentationCategory
+) {
+  await requireChair();
+  await prisma.submission.update({
+    where: { id: submissionId },
+    data: { presentationCategory },
+  });
+  revalidatePath(`/admin/submissions/${submissionId}`);
+  revalidatePath("/admin/program");
+  revalidatePath("/program");
 }
 
 export async function deleteSubmissionAction(submissionId: string) {

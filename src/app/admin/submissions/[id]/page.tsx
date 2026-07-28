@@ -2,9 +2,15 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { SUBMISSION_STATUS_LABELS, PRESENTATION_TYPE_LABELS, DECISION_LABELS } from "@/lib/labels";
+import {
+  SUBMISSION_STATUS_LABELS,
+  PRESENTATION_TYPE_LABELS,
+  PRESENTATION_CATEGORY_LABELS,
+  DECISION_LABELS,
+} from "@/lib/labels";
 import { DecisionButtons } from "./decision-buttons";
 import { DeleteSubmissionButton } from "./delete-submission-button";
+import { PresentationCategorySelect } from "./presentation-category-select";
 
 export default async function AdminSubmissionDetailPage({
   params,
@@ -49,6 +55,8 @@ export default async function AdminSubmissionDetailPage({
           <span>{submission.track.name}</span>
           <span>&middot;</span>
           <span>{PRESENTATION_TYPE_LABELS[submission.presentationType]}</span>
+          <span>&middot;</span>
+          <span>{PRESENTATION_CATEGORY_LABELS[submission.presentationCategory]}</span>
           <span>&middot;</span>
           <span>Submitted by {submission.submitter.email}</span>
           {averageScore && (
@@ -162,6 +170,22 @@ export default async function AdminSubmissionDetailPage({
           <p className="text-sm text-muted-foreground">
             Setting a decision moves this submission to &quot;Decided&quot;. Send the notification
             email from the Decisions page.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Program</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <PresentationCategorySelect
+            submissionId={submission.id}
+            value={submission.presentationCategory}
+          />
+          <p className="text-sm text-muted-foreground">
+            Determines the talk length used to auto-schedule this submission when it&apos;s
+            assigned to a program session (durations are set on the Settings page).
           </p>
         </CardContent>
       </Card>

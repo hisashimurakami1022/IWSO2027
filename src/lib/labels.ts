@@ -1,5 +1,6 @@
 import type {
   Decision,
+  PresentationCategory,
   PresentationType,
   ProgramSessionType,
   Role,
@@ -22,6 +23,11 @@ export const DECISION_LABELS: Record<Decision, string> = {
 export const PRESENTATION_TYPE_LABELS: Record<PresentationType, string> = {
   ORAL: "Oral Presentation",
   POSTER: "Poster Presentation",
+};
+
+export const PRESENTATION_CATEGORY_LABELS: Record<PresentationCategory, string> = {
+  GENERAL: "General",
+  INVITED: "Invited",
 };
 
 export const ROLE_LABELS: Record<Role, string> = {

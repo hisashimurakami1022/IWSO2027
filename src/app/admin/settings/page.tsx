@@ -19,6 +19,8 @@ export default async function SettingsPage() {
           submissionDeadline: toLocalInput(settings.submissionDeadline),
           reviewDeadline: toLocalInput(settings.reviewDeadline),
           notificationDate: toLocalInput(settings.notificationDate),
+          generalTalkMinutes: String(settings.generalTalkMinutes),
+          invitedTalkMinutes: String(settings.invitedTalkMinutes),
         }}
       />
     </div>

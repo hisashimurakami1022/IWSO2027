@@ -33,6 +33,11 @@ enum PresentationType {
   POSTER
 }
 
+enum PresentationCategory {
+  GENERAL
+  INVITED
+}
+
 enum ProgramSessionType {
   ORAL_SESSION
   POSTER_SESSION
@@ -139,25 +144,28 @@ model ConferenceSettings {
   submissionDeadline DateTime?
   reviewDeadline     DateTime?
   notificationDate   DateTime?
+  generalTalkMinutes Int       @default(15)
+  invitedTalkMinutes Int       @default(30)
   updatedAt          DateTime  @updatedAt
 }
 
 // --- Submissions ---
 
 model Submission {
-  id               String           @id @default(cuid())
-  title            String
-  keywords         String[]         @default([])
-  presentationType PresentationType @default(ORAL)
-  status           SubmissionStatus @default(DRAFT)
-  decision         Decision?
-  trackId          String
-  submitterId      String
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  submittedAt      DateTime?
-  withdrawnAt      DateTime?
-  decidedAt        DateTime?
+  id                   String               @id @default(cuid())
+  title                String
+  keywords             String[]             @default([])
+  presentationType     PresentationType     @default(ORAL)
+  presentationCategory PresentationCategory @default(GENERAL)
+  status               SubmissionStatus     @default(DRAFT)
+  decision             Decision?
+  trackId              String
+  submitterId          String
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  submittedAt          DateTime?
+  withdrawnAt          DateTime?
+  decidedAt            DateTime?
 
   track             Track                      @relation(fields: [trackId], references: [id])
   submitter         User                       @relation("Submitter", fields: [submitterId], references: [id])

@@ -12,6 +12,8 @@ const settingsSchema = z.object({
   submissionDeadline: z.string().optional().or(z.literal("")),
   reviewDeadline: z.string().optional().or(z.literal("")),
   notificationDate: z.string().optional().or(z.literal("")),
+  generalTalkMinutes: z.coerce.number().int().min(1).max(600),
+  invitedTalkMinutes: z.coerce.number().int().min(1).max(600),
 });
 
 export type SettingsActionState = {
@@ -32,6 +34,8 @@ export async function saveSettingsAction(
     submissionDeadline: formData.get("submissionDeadline"),
     reviewDeadline: formData.get("reviewDeadline"),
     notificationDate: formData.get("notificationDate"),
+    generalTalkMinutes: formData.get("generalTalkMinutes"),
+    invitedTalkMinutes: formData.get("invitedTalkMinutes"),
   });
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
@@ -46,6 +50,8 @@ export async function saveSettingsAction(
     submissionDeadline: data.submissionDeadline ? new Date(data.submissionDeadline) : null,
     reviewDeadline: data.reviewDeadline ? new Date(data.reviewDeadline) : null,
     notificationDate: data.notificationDate ? new Date(data.notificationDate) : null,
+    generalTalkMinutes: data.generalTalkMinutes,
+    invitedTalkMinutes: data.invitedTalkMinutes,
   };
 
   if (current.id) {
@@ -56,5 +62,7 @@ export async function saveSettingsAction(
 
   revalidatePath("/admin/settings");
   revalidatePath("/");
+  revalidatePath("/admin/program");
+  revalidatePath("/program");
   return { success: true };
 }

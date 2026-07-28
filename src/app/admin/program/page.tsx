@@ -8,14 +8,16 @@ import { SessionFormDialog } from "./session-form-dialog";
 import { DeleteSessionButton } from "./delete-session-button";
 import { AssignSubmissionForm } from "./assign-submission-form";
 import { RemoveSubmissionButton } from "./remove-submission-button";
-import { PROGRAM_SESSION_TYPE_LABELS } from "@/lib/labels";
+import { PROGRAM_SESSION_TYPE_LABELS, PRESENTATION_CATEGORY_LABELS } from "@/lib/labels";
+import { getConferenceSettings } from "@/lib/settings";
+import { computeTalkSlots } from "@/lib/program-schedule";
 
 function toLocalInput(date: Date) {
   return format(date, "yyyy-MM-dd'T'HH:mm");
 }
 
 export default async function AdminProgramPage() {
-  const [sessions, tracks, acceptedSubmissions] = await Promise.all([
+  const [sessions, tracks, acceptedSubmissions, settings] = await Promise.all([
     prisma.programSession.findMany({
       include: {
         track: true,
@@ -32,6 +34,7 @@ export default async function AdminProgramPage() {
       include: { programSessions: true },
       orderBy: { title: "asc" },
     }),
+    getConferenceSettings(),
   ]);
 
   const assignedSubmissionIds = new Set(
@@ -39,7 +42,7 @@ export default async function AdminProgramPage() {
   );
   const unassignedOptions = acceptedSubmissions
     .filter((s) => !assignedSubmissionIds.has(s.id))
-    .map((s) => ({ id: s.id, title: s.title }));
+    .map((s) => ({ id: s.id, title: s.title, keywords: s.keywords }));
 
   return (
     <div className="space-y-6">
@@ -77,7 +80,19 @@ export default async function AdminProgramPage() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {sessions.map((session) => (
+          {sessions.map((session) => {
+            const showSlots = session.type === "ORAL_SESSION";
+            const slots = showSlots
+              ? computeTalkSlots(
+                  session.startTime,
+                  session.submissions.map((ps) => ps.submission),
+                  settings
+                )
+              : null;
+            const lastSlot = slots ? Array.from(slots.values()).at(-1) : null;
+            const overflowsSession = lastSlot ? lastSlot.end > session.endTime : false;
+
+            return (
             <Card key={session.id}>
               <CardHeader className="flex flex-row items-start justify-between gap-4">
                 <div>
@@ -116,18 +131,38 @@ export default async function AdminProgramPage() {
               <CardContent className="space-y-3">
                 {session.submissions.length > 0 && (
                   <div className="space-y-1">
-                    {session.submissions.map((ps) => (
-                      <div key={ps.id} className="flex items-center justify-between text-sm">
-                        <span>{ps.submission.title}</span>
-                        <RemoveSubmissionButton id={ps.id} />
-                      </div>
-                    ))}
+                    {session.submissions.map((ps) => {
+                      const slot = slots?.get(ps.submissionId);
+                      return (
+                        <div key={ps.id} className="flex items-center justify-between text-sm">
+                          <span className="flex flex-wrap items-center gap-2">
+                            {slot && (
+                              <span className="font-mono text-muted-foreground">
+                                {format(slot.start, "HH:mm")}&ndash;{format(slot.end, "HH:mm")}
+                              </span>
+                            )}
+                            {ps.submission.title}
+                            <Badge variant="outline">
+                              {PRESENTATION_CATEGORY_LABELS[ps.submission.presentationCategory]}
+                            </Badge>
+                          </span>
+                          <RemoveSubmissionButton id={ps.id} />
+                        </div>
+                      );
+                    })}
+                    {overflowsSession && (
+                      <p className="text-xs text-destructive">
+                        These talks run past the session&apos;s end time ({format(session.endTime, "HH:mm")}).
+                        Extend the session or move a talk elsewhere.
+                      </p>
+                    )}
                   </div>
                 )}
                 <AssignSubmissionForm sessionId={session.id} options={unassignedOptions} />
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

@@ -10,6 +10,8 @@ export async function getConferenceSettings() {
       submissionDeadline: null,
       reviewDeadline: null,
       notificationDate: null,
+      generalTalkMinutes: 15,
+      invitedTalkMinutes: 30,
       updatedAt: new Date(),
     }
   );

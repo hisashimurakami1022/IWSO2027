@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { assignSubmissionToSessionAction } from "./actions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -12,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type SubmissionOption = { id: string; title: string };
+type SubmissionOption = { id: string; title: string; keywords: string[] };
 
 export function AssignSubmissionForm({
   sessionId,
@@ -22,7 +23,18 @@ export function AssignSubmissionForm({
   options: SubmissionOption[];
 }) {
   const [selected, setSelected] = useState("");
+  const [filter, setFilter] = useState("");
   const [isPending, startTransition] = useTransition();
+
+  const filteredOptions = useMemo(() => {
+    const query = filter.trim().toLowerCase();
+    if (!query) return options;
+    return options.filter(
+      (o) =>
+        o.title.toLowerCase().includes(query) ||
+        o.keywords.some((k) => k.toLowerCase().includes(query))
+    );
+  }, [filter, options]);
 
   function handleAssign() {
     if (!selected) return;
@@ -44,7 +56,13 @@ export function AssignSubmissionForm({
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap gap-2">
+      <Input
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+        placeholder="Filter by keyword or title"
+        className="w-56"
+      />
       <Select value={selected} onValueChange={(value) => setSelected(value ?? "")}>
         <SelectTrigger className="w-80">
           <SelectValue placeholder="Select a submission">
@@ -54,11 +72,15 @@ export function AssignSubmissionForm({
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          {options.map((o) => (
-            <SelectItem key={o.id} value={o.id}>
-              {o.title}
-            </SelectItem>
-          ))}
+          {filteredOptions.length === 0 ? (
+            <p className="px-2 py-1.5 text-sm text-muted-foreground">No matches</p>
+          ) : (
+            filteredOptions.map((o) => (
+              <SelectItem key={o.id} value={o.id}>
+                {o.title}
+              </SelectItem>
+            ))
+          )}
         </SelectContent>
       </Select>
       <Button variant="outline" onClick={handleAssign} disabled={!selected || isPending}>
