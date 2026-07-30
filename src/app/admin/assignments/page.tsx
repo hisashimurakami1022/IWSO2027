@@ -5,10 +5,13 @@ import { AutoAssignButton } from "./auto-assign-button";
 import { AssignReviewerForm } from "./assign-reviewer-form";
 import { RemoveAssignmentButton } from "./remove-assignment-button";
 import { SendRemindersButton } from "./send-reminders-button";
+import { SendReviewerNotificationButton } from "./send-reviewer-notification-button";
+import { SendAllReviewerNotificationsButton } from "./send-all-reviewer-notifications-button";
+import { getPendingReviewerNotifications } from "./actions";
 import { SUBMISSION_STATUS_LABELS } from "@/lib/labels";
 
 export default async function AssignmentsPage() {
-  const [submissions, reviewers] = await Promise.all([
+  const [submissions, reviewers, pendingNotifications] = await Promise.all([
     prisma.submission.findMany({
       where: { status: { in: ["SUBMITTED", "UNDER_REVIEW"] } },
       include: {
@@ -22,6 +25,7 @@ export default async function AssignmentsPage() {
       where: { roles: { has: "REVIEWER" } },
       orderBy: { email: "asc" },
     }),
+    getPendingReviewerNotifications(),
   ]);
 
   return (
@@ -33,6 +37,34 @@ export default async function AssignmentsPage() {
           <AutoAssignButton />
         </div>
       </div>
+
+      {pendingNotifications.length > 0 && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between gap-4">
+            <div>
+              <CardTitle className="text-base">Pending Reviewer Notifications</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Assigning a reviewer doesn&apos;t email them right away — send notifications here,
+                batched per reviewer, whenever you&apos;re ready.
+              </p>
+            </div>
+            <SendAllReviewerNotificationsButton count={pendingNotifications.length} />
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {pendingNotifications.map((p) => (
+              <div key={p.reviewerId} className="flex items-center justify-between text-sm">
+                <span>
+                  {p.reviewerEmail}{" "}
+                  <span className="text-muted-foreground">
+                    ({p.submissions.length} submission{p.submissions.length === 1 ? "" : "s"})
+                  </span>
+                </span>
+                <SendReviewerNotificationButton reviewerId={p.reviewerId} />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       {submissions.length === 0 ? (
         <Card>

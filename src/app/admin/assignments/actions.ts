@@ -5,21 +5,102 @@ import { prisma } from "@/lib/prisma";
 import { requireChair } from "@/lib/session";
 import { getConferenceSettings } from "@/lib/settings";
 import { sendNotification } from "@/lib/notifications";
+import { resend, EMAIL_FROM } from "@/lib/resend";
 import { ReviewerAssignedEmail } from "@/emails/reviewer-assigned";
 import { ReviewReminderEmail } from "@/emails/review-reminder";
 
 const REVIEWERS_PER_SUBMISSION = 2;
 
-async function notifyReviewer(reviewerEmail: string, reviewerId: string, submissionId: string, title: string) {
+// Assignment notifications are batched rather than sent per-assignment, so a
+// reviewer given several submissions at once (e.g. by auto-assign) gets one
+// email listing all of them instead of one email each. See
+// getPendingReviewerNotifications / send*PendingAssignmentNotifications*.
+async function notifyReviewerBatch(
+  reviewerId: string,
+  reviewerEmail: string,
+  submissions: { id: string; title: string }[]
+) {
   const settings = await getConferenceSettings();
-  await sendNotification({
-    to: reviewerEmail,
-    subject: `[${settings.conferenceName}] New submission assigned for review`,
-    type: "REVIEWER_ASSIGNED",
-    userId: reviewerId,
-    submissionId,
-    react: ReviewerAssignedEmail({ title, conferenceName: settings.conferenceName }),
-  });
+  const plural = submissions.length > 1;
+  const subject = `[${settings.conferenceName}] ${submissions.length} submission${plural ? "s" : ""} assigned for review`;
+
+  try {
+    await resend.emails.send({
+      from: EMAIL_FROM,
+      to: reviewerEmail,
+      subject,
+      react: ReviewerAssignedEmail({
+        titles: submissions.map((s) => s.title),
+        conferenceName: settings.conferenceName,
+      }),
+    });
+    await prisma.notificationLog.createMany({
+      data: submissions.map((s) => ({
+        type: "REVIEWER_ASSIGNED" as const,
+        subject,
+        recipient: reviewerEmail,
+        userId: reviewerId,
+        submissionId: s.id,
+      })),
+    });
+  } catch (error) {
+    console.error(`Failed to send reviewer-assigned notification to ${reviewerEmail}:`, error);
+  }
+}
+
+export async function getPendingReviewerNotifications() {
+  const [assignments, logs] = await Promise.all([
+    prisma.reviewAssignment.findMany({
+      include: { reviewer: true, submission: true },
+      orderBy: { assignedAt: "asc" },
+    }),
+    prisma.notificationLog.findMany({
+      where: { type: "REVIEWER_ASSIGNED" },
+      select: { userId: true, submissionId: true },
+    }),
+  ]);
+
+  const notified = new Set(logs.map((l) => `${l.userId}:${l.submissionId}`));
+
+  const byReviewer = new Map<
+    string,
+    { reviewerId: string; reviewerEmail: string; submissions: { id: string; title: string }[] }
+  >();
+
+  for (const a of assignments) {
+    if (notified.has(`${a.reviewerId}:${a.submissionId}`)) continue;
+    const entry = byReviewer.get(a.reviewerId) ?? {
+      reviewerId: a.reviewerId,
+      reviewerEmail: a.reviewer.email,
+      submissions: [],
+    };
+    entry.submissions.push({ id: a.submission.id, title: a.submission.title });
+    byReviewer.set(a.reviewerId, entry);
+  }
+
+  return Array.from(byReviewer.values());
+}
+
+export async function sendReviewerAssignmentNotificationAction(reviewerId: string) {
+  await requireChair();
+  const pending = await getPendingReviewerNotifications();
+  const entry = pending.find((p) => p.reviewerId === reviewerId);
+  if (!entry) return;
+
+  await notifyReviewerBatch(entry.reviewerId, entry.reviewerEmail, entry.submissions);
+  revalidatePath("/admin/assignments");
+}
+
+export async function sendAllPendingAssignmentNotificationsAction() {
+  await requireChair();
+  const pending = await getPendingReviewerNotifications();
+
+  for (const entry of pending) {
+    await notifyReviewerBatch(entry.reviewerId, entry.reviewerEmail, entry.submissions);
+  }
+
+  revalidatePath("/admin/assignments");
+  return { reviewerCount: pending.length };
 }
 
 export async function assignReviewerAction(submissionId: string, reviewerId: string) {
@@ -55,8 +136,6 @@ export async function assignReviewerAction(submissionId: string, reviewerId: str
       data: { status: "UNDER_REVIEW" },
     });
   }
-
-  await notifyReviewer(reviewer.email, reviewer.id, submission.id, submission.title);
 
   revalidatePath("/admin/assignments");
 }
@@ -115,7 +194,6 @@ export async function autoAssignAction() {
         data: { submissionId: submission.id, reviewerId: reviewer.id, assignedBy: actor.id },
       });
       loadMap.set(reviewer.id, (loadMap.get(reviewer.id) ?? 0) + 1);
-      await notifyReviewer(reviewer.email, reviewer.id, submission.id, submission.title);
       assignedCount += 1;
     }
 
