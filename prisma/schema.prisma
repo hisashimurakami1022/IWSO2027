@@ -204,11 +204,12 @@ model SubmissionFile {
 // --- Review ---
 
 model ReviewAssignment {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   submissionId String
   reviewerId   String
-  assignedAt   DateTime @default(now())
+  assignedAt   DateTime  @default(now())
   assignedBy   String?
+  notifiedAt   DateTime?
 
   submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   reviewer   User       @relation(fields: [reviewerId], references: [id], onDelete: Cascade)

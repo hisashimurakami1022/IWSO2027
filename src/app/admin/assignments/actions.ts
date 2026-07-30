@@ -13,8 +13,11 @@ const REVIEWERS_PER_SUBMISSION = 2;
 
 // Assignment notifications are batched rather than sent per-assignment, so a
 // reviewer given several submissions at once (e.g. by auto-assign) gets one
-// email listing all of them instead of one email each. See
-// getPendingReviewerNotifications / send*PendingAssignmentNotifications*.
+// email listing all of them instead of one email each. "Pending" is tracked
+// directly on ReviewAssignment.notifiedAt, so unassigning and reassigning a
+// reviewer (a fresh row, notifiedAt null) always counts as pending again,
+// regardless of any older notification history for that reviewer/submission
+// pair. See getPendingReviewerNotifications / send*PendingAssignmentNotifications*.
 async function notifyReviewerBatch(
   reviewerId: string,
   reviewerEmail: string,
@@ -34,6 +37,7 @@ async function notifyReviewerBatch(
         conferenceName: settings.conferenceName,
       }),
     });
+    const notifiedAt = new Date();
     await prisma.notificationLog.createMany({
       data: submissions.map((s) => ({
         type: "REVIEWER_ASSIGNED" as const,
@@ -43,24 +47,21 @@ async function notifyReviewerBatch(
         submissionId: s.id,
       })),
     });
+    await prisma.reviewAssignment.updateMany({
+      where: { reviewerId, submissionId: { in: submissions.map((s) => s.id) } },
+      data: { notifiedAt },
+    });
   } catch (error) {
     console.error(`Failed to send reviewer-assigned notification to ${reviewerEmail}:`, error);
   }
 }
 
 export async function getPendingReviewerNotifications() {
-  const [assignments, logs] = await Promise.all([
-    prisma.reviewAssignment.findMany({
-      include: { reviewer: true, submission: true },
-      orderBy: { assignedAt: "asc" },
-    }),
-    prisma.notificationLog.findMany({
-      where: { type: "REVIEWER_ASSIGNED" },
-      select: { userId: true, submissionId: true },
-    }),
-  ]);
-
-  const notified = new Set(logs.map((l) => `${l.userId}:${l.submissionId}`));
+  const assignments = await prisma.reviewAssignment.findMany({
+    where: { notifiedAt: null },
+    include: { reviewer: true, submission: true },
+    orderBy: { assignedAt: "asc" },
+  });
 
   const byReviewer = new Map<
     string,
@@ -68,7 +69,6 @@ export async function getPendingReviewerNotifications() {
   >();
 
   for (const a of assignments) {
-    if (notified.has(`${a.reviewerId}:${a.submissionId}`)) continue;
     const entry = byReviewer.get(a.reviewerId) ?? {
       reviewerId: a.reviewerId,
       reviewerEmail: a.reviewer.email,
