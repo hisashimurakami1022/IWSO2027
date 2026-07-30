@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/session";
 import { submissionSchema, MAX_ABSTRACT_FILE_SIZE, ABSTRACT_FILE_MIME_TYPE } from "@/lib/validations";
 import { getConferenceSettings, isSubmissionOpen } from "@/lib/settings";
 import { sendNotification } from "@/lib/notifications";
+import { APP_URL } from "@/lib/app-url";
 import { SubmissionConfirmationEmail } from "@/emails/submission-confirmation";
 
 export type SubmissionActionState = {
@@ -152,6 +153,7 @@ export async function saveSubmissionAction(
       react: SubmissionConfirmationEmail({
         title: submission.title,
         conferenceName: settings.conferenceName,
+        submissionUrl: `${APP_URL}/submissions/${submission.id}`,
       }),
     });
   }

@@ -6,6 +6,7 @@ import { requireChair } from "@/lib/session";
 import { getConferenceSettings } from "@/lib/settings";
 import { sendNotification } from "@/lib/notifications";
 import { resend, EMAIL_FROM } from "@/lib/resend";
+import { APP_URL } from "@/lib/app-url";
 import { ReviewerAssignedEmail } from "@/emails/reviewer-assigned";
 import { ReviewReminderEmail } from "@/emails/review-reminder";
 
@@ -33,8 +34,12 @@ async function notifyReviewerBatch(
       to: reviewerEmail,
       subject,
       react: ReviewerAssignedEmail({
-        titles: submissions.map((s) => s.title),
+        submissions: submissions.map((s) => ({
+          title: s.title,
+          url: `${APP_URL}/review/${s.id}`,
+        })),
         conferenceName: settings.conferenceName,
+        reviewQueueUrl: `${APP_URL}/review`,
       }),
     });
     const notifiedAt = new Date();
@@ -230,6 +235,7 @@ export async function sendReviewRemindersAction() {
       react: ReviewReminderEmail({
         title: assignment.submission.title,
         conferenceName: settings.conferenceName,
+        reviewUrl: `${APP_URL}/review/${assignment.submissionId}`,
       }),
     });
     sentCount += 1;

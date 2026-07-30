@@ -1,15 +1,17 @@
-import { Body, Container, Head, Heading, Html, Preview, Text } from "@react-email/components";
+import { Body, Container, Head, Heading, Html, Link, Preview, Text } from "@react-email/components";
 
 export function DecisionNotificationEmail({
   title,
   conferenceName,
   decision,
   comments,
+  submissionUrl,
 }: {
   title: string;
   conferenceName: string;
   decision: "ACCEPT" | "REJECT";
   comments: string[];
+  submissionUrl: string;
 }) {
   const isAccepted = decision === "ACCEPT";
 
@@ -43,6 +45,11 @@ export function DecisionNotificationEmail({
             </>
           )}
           <Text>Thank you for your submission to {conferenceName}.</Text>
+          <Text>
+            <Link href={submissionUrl} style={{ fontWeight: "bold" }}>
+              View your submission
+            </Link>
+          </Text>
         </Container>
       </Body>
     </Html>

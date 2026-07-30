@@ -1,11 +1,13 @@
-import { Body, Container, Head, Heading, Html, Preview, Text } from "@react-email/components";
+import { Body, Container, Head, Heading, Html, Link, Preview, Text } from "@react-email/components";
 
 export function ReviewReminderEmail({
   title,
   conferenceName,
+  reviewUrl,
 }: {
   title: string;
   conferenceName: string;
+  reviewUrl: string;
 }) {
   return (
     <Html>
@@ -20,6 +22,11 @@ export function ReviewReminderEmail({
           </Text>
           <Text style={{ fontWeight: "bold", fontSize: "16px" }}>{title}</Text>
           <Text>Please sign in to the system to complete your review before the deadline.</Text>
+          <Text>
+            <Link href={reviewUrl} style={{ fontWeight: "bold" }}>
+              Complete your review
+            </Link>
+          </Text>
         </Container>
       </Body>
     </Html>

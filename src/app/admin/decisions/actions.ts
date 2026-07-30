@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireChair } from "@/lib/session";
 import { getConferenceSettings } from "@/lib/settings";
 import { sendNotification } from "@/lib/notifications";
+import { APP_URL } from "@/lib/app-url";
 import { DecisionNotificationEmail } from "@/emails/decision-notification";
 import { DECISION_LABELS } from "@/lib/labels";
 
@@ -31,6 +32,7 @@ async function notifySubmission(submissionId: string) {
       conferenceName: settings.conferenceName,
       decision: submission.decision,
       comments,
+      submissionUrl: `${APP_URL}/submissions/${submission.id}`,
     }),
   });
 }

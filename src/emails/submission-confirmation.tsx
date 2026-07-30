@@ -1,11 +1,13 @@
-import { Body, Container, Head, Heading, Html, Preview, Text } from "@react-email/components";
+import { Body, Container, Head, Heading, Html, Link, Preview, Text } from "@react-email/components";
 
 export function SubmissionConfirmationEmail({
   title,
   conferenceName,
+  submissionUrl,
 }: {
   title: string;
   conferenceName: string;
+  submissionUrl: string;
 }) {
   return (
     <Html>
@@ -22,6 +24,11 @@ export function SubmissionConfirmationEmail({
           <Text>
             We will notify you of the review outcome by email before the notification date. You
             may continue to edit your submission until the submission deadline.
+          </Text>
+          <Text>
+            <Link href={submissionUrl} style={{ fontWeight: "bold" }}>
+              View your submission
+            </Link>
           </Text>
         </Container>
       </Body>
