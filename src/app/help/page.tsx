@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { getCurrentUser } from "@/lib/session";
+import { requireUser } from "@/lib/session";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MarkdownGuide } from "@/components/markdown-guide";
@@ -10,18 +10,13 @@ function readGuide(filename: string) {
 }
 
 export default async function HelpPage() {
-  const user = await getCurrentUser();
-  const roles = user?.roles ?? [];
+  const user = await requireUser();
+  const roles = user.roles;
 
-  const defaultTab = roles.includes("CHAIR")
-    ? "chair"
-    : roles.includes("REVIEWER")
-      ? "reviewer"
-      : "author";
+  const canSeeReviewer = roles.includes("REVIEWER") || roles.includes("CHAIR");
+  const canSeeChair = roles.includes("CHAIR");
 
-  const authorGuide = readGuide("author-guide-en.md");
-  const reviewerGuide = readGuide("reviewer-guide-en.md");
-  const chairGuide = readGuide("chair-guide-en.md");
+  const defaultTab = canSeeChair ? "chair" : canSeeReviewer ? "reviewer" : "author";
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-8">
@@ -35,30 +30,34 @@ export default async function HelpPage() {
       <Tabs defaultValue={defaultTab}>
         <TabsList>
           <TabsTrigger value="author">Author</TabsTrigger>
-          <TabsTrigger value="reviewer">Reviewer</TabsTrigger>
-          <TabsTrigger value="chair">Chair</TabsTrigger>
+          {canSeeReviewer && <TabsTrigger value="reviewer">Reviewer</TabsTrigger>}
+          {canSeeChair && <TabsTrigger value="chair">Chair</TabsTrigger>}
         </TabsList>
         <TabsContent value="author">
           <Card>
             <CardContent className="pt-6">
-              <MarkdownGuide content={authorGuide} />
+              <MarkdownGuide content={readGuide("author-guide-en.md")} />
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="reviewer">
-          <Card>
-            <CardContent className="pt-6">
-              <MarkdownGuide content={reviewerGuide} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="chair">
-          <Card>
-            <CardContent className="pt-6">
-              <MarkdownGuide content={chairGuide} />
-            </CardContent>
-          </Card>
-        </TabsContent>
+        {canSeeReviewer && (
+          <TabsContent value="reviewer">
+            <Card>
+              <CardContent className="pt-6">
+                <MarkdownGuide content={readGuide("reviewer-guide-en.md")} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+        {canSeeChair && (
+          <TabsContent value="chair">
+            <Card>
+              <CardContent className="pt-6">
+                <MarkdownGuide content={readGuide("chair-guide-en.md")} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
