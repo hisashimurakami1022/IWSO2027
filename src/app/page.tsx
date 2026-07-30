@@ -55,13 +55,15 @@ export default async function Home() {
                 render={<Link href="/login">Sign in to submit</Link>}
               />
             )}
-            <Button
-              variant="outline"
-              size="lg"
-              nativeButton={false}
-              className="border-white/60 bg-white/10 text-white hover:bg-white/20"
-              render={<Link href="/program">View Program</Link>}
-            />
+            {user?.roles.includes("CHAIR") && (
+              <Button
+                variant="outline"
+                size="lg"
+                nativeButton={false}
+                className="border-white/60 bg-white/10 text-white hover:bg-white/20"
+                render={<Link href="/program">View Program</Link>}
+              />
+            )}
           </div>
         </div>
       </section>
