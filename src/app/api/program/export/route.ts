@@ -1,8 +1,9 @@
+import { format } from "date-fns";
 import { prisma } from "@/lib/prisma";
 import { requireChair } from "@/lib/session";
-import { PROGRAM_SESSION_TYPE_LABELS, PRESENTATION_CATEGORY_LABELS } from "@/lib/labels";
+import { PROGRAM_SESSION_TYPE_LABELS } from "@/lib/labels";
 import { getConferenceSettings } from "@/lib/settings";
-import { computeTalkSlots } from "@/lib/program-schedule";
+import { computeTalkSlots, type TalkSlot } from "@/lib/program-schedule";
 
 function csvEscape(value: string) {
   if (/[",\n]/.test(value)) {
@@ -11,15 +12,21 @@ function csvEscape(value: string) {
   return value;
 }
 
+function formatTalkTime(slot: TalkSlot | undefined) {
+  if (!slot) return "";
+  return `${format(slot.start, "HH:mm")}-${format(slot.end, "HH:mm")}`;
+}
+
 export async function GET() {
   await requireChair();
 
   const [sessions, settings] = await Promise.all([
     prisma.programSession.findMany({
       include: {
-        track: true,
         submissions: {
-          include: { submission: { include: { authors: true } } },
+          include: {
+            submission: { include: { authors: { orderBy: { order: "asc" } } } },
+          },
           orderBy: { orderIndex: "asc" },
         },
       },
@@ -29,19 +36,7 @@ export async function GET() {
   ]);
 
   const rows: string[][] = [
-    [
-      "Session",
-      "Type",
-      "Room",
-      "Start",
-      "End",
-      "Track",
-      "Submission Title",
-      "Category",
-      "Talk Start",
-      "Talk End",
-      "Authors",
-    ],
+    ["Session", "Type", "Room", "Submission Title", "Talk Time", "Authors", "Affiliations"],
   ];
 
   for (const session of sessions) {
@@ -55,35 +50,18 @@ export async function GET() {
         : null;
 
     if (session.submissions.length === 0) {
-      rows.push([
-        session.title,
-        PROGRAM_SESSION_TYPE_LABELS[session.type],
-        session.room ?? "",
-        session.startTime.toISOString(),
-        session.endTime.toISOString(),
-        session.track?.name ?? "",
-        "",
-        "",
-        "",
-        "",
-        "",
-      ]);
+      rows.push([session.title, PROGRAM_SESSION_TYPE_LABELS[session.type], session.room ?? "", "", "", "", ""]);
       continue;
     }
     for (const ps of session.submissions) {
-      const slot = slots?.get(ps.submissionId);
       rows.push([
         session.title,
         PROGRAM_SESSION_TYPE_LABELS[session.type],
         session.room ?? "",
-        session.startTime.toISOString(),
-        session.endTime.toISOString(),
-        session.track?.name ?? "",
         ps.submission.title,
-        PRESENTATION_CATEGORY_LABELS[ps.submission.presentationCategory],
-        slot ? slot.start.toISOString() : "",
-        slot ? slot.end.toISOString() : "",
+        formatTalkTime(slots?.get(ps.submissionId)),
         ps.submission.authors.map((a) => a.name).join("; "),
+        ps.submission.authors.map((a) => a.affiliation ?? "").join("; "),
       ]);
     }
   }
