@@ -35,8 +35,8 @@ You'll receive a confirmation email the first time your submission is marked as 
 
 Go to **Submissions** to see all your submissions and their status.
 
-- While a submission is still **Draft** or **Submitted** (i.e. before a reviewer has been assigned), you can open it to edit any field (including replacing the PDF) or to **Withdraw** it.
-- Once a reviewer has been assigned (**Under Review**) or later, it can no longer be edited or withdrawn — contact the Chair if something needs to change at that point.
+- While a submission is still **Draft** or **Submitted** (i.e. before a reviewer has been assigned), you can open it and edit any field, including replacing the PDF.
+- You can **Withdraw** a submission any time up until a decision has been recorded — including while it's **Under Review**. Once it's **Decided**, it can no longer be withdrawn.
 - Withdrawing cannot be undone, and a withdrawn submission can't be resubmitted — create a new one if needed.
 
 ## 4. Submission statuses

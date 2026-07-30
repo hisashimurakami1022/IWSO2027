@@ -32,6 +32,7 @@ export default async function SubmissionDetailPage({
   }
 
   const editable = submission.status === "DRAFT" || submission.status === "SUBMITTED";
+  const canWithdraw = submission.status !== "DECIDED" && submission.status !== "WITHDRAWN";
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-8">
@@ -47,7 +48,7 @@ export default async function SubmissionDetailPage({
             )}
           </div>
         </div>
-        {editable && <WithdrawSubmissionButton id={submission.id} />}
+        {canWithdraw && <WithdrawSubmissionButton id={submission.id} />}
       </div>
 
       {editable ? (
