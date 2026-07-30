@@ -23,6 +23,10 @@ export async function SiteHeader() {
         </Link>
 
         <nav className="flex items-center gap-4 text-sm">
+          <Link href="/help" className="text-muted-foreground hover:text-foreground">
+            Help
+          </Link>
+
           {roles.includes("CHAIR") && (
             <Link href="/program" className="text-muted-foreground hover:text-foreground">
               Program

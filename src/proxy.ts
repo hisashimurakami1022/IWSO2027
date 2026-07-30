@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
-const PUBLIC_PREFIXES = ["/login", "/verify-request", "/program", "/api/auth"];
+const PUBLIC_PREFIXES = ["/login", "/verify-request", "/program", "/help", "/api/auth"];
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
