@@ -4,13 +4,7 @@ import { requireChair } from "@/lib/session";
 import { PROGRAM_SESSION_TYPE_LABELS } from "@/lib/labels";
 import { getConferenceSettings } from "@/lib/settings";
 import { computeTalkSlots, type TalkSlot } from "@/lib/program-schedule";
-
-function csvEscape(value: string) {
-  if (/[",\n]/.test(value)) {
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-  return value;
-}
+import { toCsv } from "@/lib/csv";
 
 function formatTalkTime(slot: TalkSlot | undefined) {
   if (!slot) return "";
@@ -66,7 +60,7 @@ export async function GET() {
     }
   }
 
-  const csv = rows.map((r) => r.map(csvEscape).join(",")).join("\n");
+  const csv = toCsv(rows);
 
   return new Response(csv, {
     headers: {

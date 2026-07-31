@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -34,9 +35,25 @@ export default async function AdminSubmissionsPage({
     orderBy: { createdAt: "desc" },
   });
 
+  const exportQuery = status ? `?status=${status}` : "";
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Submissions</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-2xl font-semibold">Submissions</h1>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<a href={`/api/submissions/export/pdfs${exportQuery}`}>Download PDFs (ZIP)</a>}
+          />
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<a href={`/api/submissions/export/csv${exportQuery}`}>Export CSV</a>}
+          />
+        </div>
+      </div>
 
       <div className="flex flex-wrap gap-2 text-sm">
         <FilterLink label="All" href="/admin/submissions" active={!status} />
