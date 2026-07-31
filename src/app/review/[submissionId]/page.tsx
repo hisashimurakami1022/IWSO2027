@@ -87,14 +87,7 @@ export default async function ReviewSubmissionPage({
           <ReviewForm
             submissionId={submission.id}
             defaultValues={
-              review
-                ? {
-                    score: review.score,
-                    recommendation: review.recommendation,
-                    commentsForAuthor: review.commentsForAuthor,
-                    commentsForChair: review.commentsForChair,
-                  }
-                : undefined
+              review ? { score: review.score, recommendation: review.recommendation } : undefined
             }
           />
         </CardContent>

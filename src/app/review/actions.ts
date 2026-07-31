@@ -9,8 +9,6 @@ import { requireUser } from "@/lib/session";
 const reviewSchema = z.object({
   score: z.coerce.number().int().min(1, "Select a score").max(5),
   recommendation: z.enum(["ACCEPT", "REJECT"]),
-  commentsForAuthor: z.string().trim().max(3000).optional().or(z.literal("")),
-  commentsForChair: z.string().trim().max(3000).optional().or(z.literal("")),
 });
 
 export type ReviewActionState = {
@@ -35,8 +33,6 @@ export async function saveReviewAction(
   const parsed = reviewSchema.safeParse({
     score: formData.get("score"),
     recommendation: formData.get("recommendation"),
-    commentsForAuthor: formData.get("commentsForAuthor"),
-    commentsForChair: formData.get("commentsForChair"),
   });
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
@@ -49,8 +45,6 @@ export async function saveReviewAction(
     update: {
       score: data.score,
       recommendation: data.recommendation,
-      commentsForAuthor: data.commentsForAuthor || null,
-      commentsForChair: data.commentsForChair || null,
       submittedAt: new Date(),
     },
     create: {
@@ -59,8 +53,6 @@ export async function saveReviewAction(
       reviewerId: user.id,
       score: data.score,
       recommendation: data.recommendation,
-      commentsForAuthor: data.commentsForAuthor || null,
-      commentsForChair: data.commentsForChair || null,
       submittedAt: new Date(),
     },
   });
