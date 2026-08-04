@@ -68,7 +68,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-4xl gap-4 px-4 sm:grid-cols-3">
+      <section className="mx-auto max-w-xs px-4">
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Submission Deadline</CardTitle>
@@ -76,26 +76,6 @@ export default async function Home() {
           <CardContent className="text-lg font-semibold">
             {settings?.submissionDeadline
               ? format(settings.submissionDeadline, "MMM d, yyyy (EEE) HH:mm")
-              : "TBD"}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Review Deadline</CardTitle>
-          </CardHeader>
-          <CardContent className="text-lg font-semibold">
-            {settings?.reviewDeadline
-              ? format(settings.reviewDeadline, "MMM d, yyyy (EEE) HH:mm")
-              : "TBD"}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Notification Date</CardTitle>
-          </CardHeader>
-          <CardContent className="text-lg font-semibold">
-            {settings?.notificationDate
-              ? format(settings.notificationDate, "MMM d, yyyy (EEE)")
               : "TBD"}
           </CardContent>
         </Card>
