@@ -11,13 +11,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DECISION_LABELS } from "@/lib/labels";
+import { REVIEW_RATING_LABELS } from "@/lib/labels";
+import type { ReviewRating } from "@/generated/prisma/client";
 
 const initialState: ReviewActionState = {};
 
 type ReviewFormValues = {
-  score?: number | null;
-  recommendation?: "ACCEPT" | "REJECT" | null;
+  rating?: ReviewRating | null;
 };
 
 export function ReviewForm({
@@ -39,49 +39,23 @@ export function ReviewForm({
         </p>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="score">Score (1-5)</Label>
-          <Select
-            name="score"
-            defaultValue={defaultValues?.score ? String(defaultValues.score) : undefined}
-          >
-            <SelectTrigger id="score" className="w-full">
-              <SelectValue placeholder="Select a score" />
-            </SelectTrigger>
-            <SelectContent>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <SelectItem key={n} value={String(n)}>
-                  {n}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {state.errors?.score && <p className="text-sm text-destructive">{state.errors.score[0]}</p>}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="recommendation">Recommendation</Label>
-          <Select name="recommendation" defaultValue={defaultValues?.recommendation ?? undefined}>
-            <SelectTrigger id="recommendation" className="w-full">
-              <SelectValue placeholder="Select a recommendation">
-                {(value: keyof typeof DECISION_LABELS | null) =>
-                  value ? DECISION_LABELS[value] : "Select a recommendation"
-                }
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(DECISION_LABELS).map(([value, label]) => (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {state.errors?.recommendation && (
-            <p className="text-sm text-destructive">{state.errors.recommendation[0]}</p>
-          )}
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="rating">Rating</Label>
+        <Select name="rating" defaultValue={defaultValues?.rating ?? undefined}>
+          <SelectTrigger id="rating" className="w-full">
+            <SelectValue placeholder="Select a rating">
+              {(value: ReviewRating | null) => (value ? REVIEW_RATING_LABELS[value] : "Select a rating")}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(REVIEW_RATING_LABELS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {state.errors?.rating && <p className="text-sm text-destructive">{state.errors.rating[0]}</p>}
       </div>
 
       <Button type="submit" disabled={isPending}>

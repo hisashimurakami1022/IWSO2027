@@ -7,6 +7,8 @@ import {
   PRESENTATION_TYPE_LABELS,
   PRESENTATION_CATEGORY_LABELS,
   DECISION_LABELS,
+  REVIEW_RATING_LABELS,
+  REVIEW_RATING_VALUES,
 } from "@/lib/labels";
 import { DecisionButtons } from "./decision-buttons";
 import { DeleteSubmissionButton } from "./delete-submission-button";
@@ -36,12 +38,14 @@ export default async function AdminSubmissionDetailPage({
     notFound();
   }
 
-  const submittedScores = submission.reviewAssignments
-    .map((a) => a.review?.score)
-    .filter((s): s is number => typeof s === "number");
-  const averageScore =
-    submittedScores.length > 0
-      ? (submittedScores.reduce((sum, s) => sum + s, 0) / submittedScores.length).toFixed(1)
+  // NOT_APPLICABLE ratings are excluded from the average (no numeric value),
+  // not just unsubmitted reviews.
+  const ratingValues = submission.reviewAssignments
+    .map((a) => (a.review?.rating ? REVIEW_RATING_VALUES[a.review.rating] : undefined))
+    .filter((v): v is number => typeof v === "number");
+  const averageRating =
+    ratingValues.length > 0
+      ? (ratingValues.reduce((sum, v) => sum + v, 0) / ratingValues.length).toFixed(1)
       : null;
 
   return (
@@ -77,10 +81,10 @@ export default async function AdminSubmissionDetailPage({
           )}
           <span>&middot;</span>
           <span>Submitted by {submission.submitter.email}</span>
-          {averageScore && (
+          {averageRating && (
             <>
               <span>&middot;</span>
-              <span>Avg. score {averageScore}</span>
+              <span>Avg. rating {averageRating}</span>
             </>
           )}
         </div>
@@ -150,14 +154,9 @@ export default async function AdminSubmissionDetailPage({
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-medium">{a.reviewer.email}</span>
                 {a.review?.submittedAt ? (
-                  <>
-                    <Badge>Score: {a.review.score}</Badge>
-                    {a.review.recommendation && (
-                      <Badge variant="secondary">
-                        {DECISION_LABELS[a.review.recommendation]}
-                      </Badge>
-                    )}
-                  </>
+                  a.review.rating && (
+                    <Badge>{REVIEW_RATING_LABELS[a.review.rating]}</Badge>
+                  )
                 ) : (
                   <Badge variant="outline">Pending</Badge>
                 )}

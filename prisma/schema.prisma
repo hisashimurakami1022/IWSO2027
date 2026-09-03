@@ -28,6 +28,13 @@ enum Decision {
   REJECT
 }
 
+enum ReviewRating {
+  RECOMMENDED
+  NEUTRAL
+  NOT_RECOMMENDED
+  NOT_APPLICABLE
+}
+
 enum PresentationType {
   ORAL
   POSTER
@@ -262,17 +269,16 @@ model ReviewAssignment {
 }
 
 model Review {
-  id                String    @id @default(cuid())
-  assignmentId      String    @unique
+  id                String        @id @default(cuid())
+  assignmentId      String        @unique
   submissionId      String
   reviewerId        String
-  score             Int?
-  recommendation    Decision?
-  commentsForAuthor String?   @db.Text
-  commentsForChair  String?   @db.Text
+  rating            ReviewRating?
+  commentsForAuthor String?       @db.Text
+  commentsForChair  String?       @db.Text
   submittedAt       DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 
   assignment ReviewAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
   submission Submission       @relation(fields: [submissionId], references: [id], onDelete: Cascade)

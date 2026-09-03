@@ -3,6 +3,7 @@ import type {
   PresentationCategory,
   PresentationType,
   ProgramSessionType,
+  ReviewRating,
   Role,
   SubmissionStatus,
 } from "@/generated/prisma/client";
@@ -18,6 +19,20 @@ export const SUBMISSION_STATUS_LABELS: Record<SubmissionStatus, string> = {
 export const DECISION_LABELS: Record<Decision, string> = {
   ACCEPT: "Accept",
   REJECT: "Reject",
+};
+
+export const REVIEW_RATING_LABELS: Record<ReviewRating, string> = {
+  RECOMMENDED: "+1 (recommended)",
+  NEUTRAL: "0 (neutral)",
+  NOT_RECOMMENDED: "-1 (not recommended)",
+  NOT_APPLICABLE: "NA (out of my research field)",
+};
+
+// Numeric value for averaging ratings; NOT_APPLICABLE is excluded (not 0).
+export const REVIEW_RATING_VALUES: Partial<Record<ReviewRating, number>> = {
+  RECOMMENDED: 1,
+  NEUTRAL: 0,
+  NOT_RECOMMENDED: -1,
 };
 
 export const PRESENTATION_TYPE_LABELS: Record<PresentationType, string> = {

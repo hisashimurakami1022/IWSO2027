@@ -7,8 +7,9 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 
 const reviewSchema = z.object({
-  score: z.coerce.number().int().min(1, "Select a score").max(5),
-  recommendation: z.enum(["ACCEPT", "REJECT"]),
+  rating: z.enum(["RECOMMENDED", "NEUTRAL", "NOT_RECOMMENDED", "NOT_APPLICABLE"], {
+    message: "Select a rating",
+  }),
 });
 
 export type ReviewActionState = {
@@ -31,8 +32,7 @@ export async function saveReviewAction(
   }
 
   const parsed = reviewSchema.safeParse({
-    score: formData.get("score"),
-    recommendation: formData.get("recommendation"),
+    rating: formData.get("rating"),
   });
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
@@ -43,16 +43,14 @@ export async function saveReviewAction(
   await prisma.review.upsert({
     where: { assignmentId: assignment.id },
     update: {
-      score: data.score,
-      recommendation: data.recommendation,
+      rating: data.rating,
       submittedAt: new Date(),
     },
     create: {
       assignmentId: assignment.id,
       submissionId,
       reviewerId: user.id,
-      score: data.score,
-      recommendation: data.recommendation,
+      rating: data.rating,
       submittedAt: new Date(),
     },
   });
