@@ -28,8 +28,13 @@ export async function loginWithLinkAction(formData: FormData) {
   const emailOk = checkRateLimit(`login:email:${email}`, 1, 60 * 1000);
   const ipOk = checkRateLimit(`login:ip:${ip}`, 5, 10 * 60 * 1000);
 
-  if (!emailOk || !ipOk) {
-    const params = new URLSearchParams({ error: "rate_limited" });
+  if (!emailOk) {
+    const params = new URLSearchParams({ error: "rate_limited_email" });
+    if (callbackUrl) params.set("callbackUrl", callbackUrl);
+    redirect(`/login?${params.toString()}`);
+  }
+  if (!ipOk) {
+    const params = new URLSearchParams({ error: "rate_limited_ip" });
     if (callbackUrl) params.set("callbackUrl", callbackUrl);
     redirect(`/login?${params.toString()}`);
   }

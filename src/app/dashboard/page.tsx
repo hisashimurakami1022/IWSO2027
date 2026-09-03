@@ -1,12 +1,19 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/session";
+import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ROLE_LABELS } from "@/lib/labels";
+import { SetPasswordPrompt } from "@/components/set-password-prompt";
 
 export default async function DashboardPage() {
   const user = await requireUser();
   const isReviewer = user.roles.includes("REVIEWER") || user.roles.includes("CHAIR");
   const isChair = user.roles.includes("CHAIR");
+
+  const record = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { passwordHash: true },
+  });
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
@@ -19,6 +26,8 @@ export default async function DashboardPage() {
           )}
         </p>
       </div>
+
+      {!record?.passwordHash && <SetPasswordPrompt />}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>

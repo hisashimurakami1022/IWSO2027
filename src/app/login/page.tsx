@@ -23,9 +23,16 @@ export default async function LoginPage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {error === "rate_limited" && (
+          {error === "rate_limited_email" && (
             <p className="mb-4 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              Too many sign-in requests. Please wait a minute and try again.
+              A sign-in link was already sent to this address in the last minute. Please wait a
+              moment and try again.
+            </p>
+          )}
+          {error === "rate_limited_ip" && (
+            <p className="mb-4 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              Too many sign-in requests from your network. Please wait about 10 minutes, or use
+              the password form below if you&apos;ve set one.
             </p>
           )}
           <form action={loginWithLinkAction} className="space-y-4">
