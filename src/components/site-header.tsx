@@ -47,6 +47,12 @@ export async function SiteHeader() {
               <Link href="/help" className="text-muted-foreground hover:text-foreground">
                 Help
               </Link>
+              <Link
+                href="/account/password"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                Password
+              </Link>
             </>
           )}
 

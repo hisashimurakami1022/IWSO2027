@@ -71,6 +71,12 @@ model User {
   roles         Role[]    @default([])
   emailVerified DateTime?
   image         String?
+  // Optional password sign-in, set by the user after their first magic-link
+  // sign-in (see /account/password). Not managed by Auth.js's Credentials
+  // provider — that forces JWT sessions, incompatible with this app's
+  // database session strategy. Verified and turned into a real Session row
+  // by hand in src/lib/password-session.ts instead.
+  passwordHash  String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

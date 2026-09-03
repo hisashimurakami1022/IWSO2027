@@ -1,20 +1,9 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { signIn } from "@/lib/auth";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { loginWithLinkAction } from "./actions";
+import { PasswordLoginForm } from "./password-login-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-// nginx is the only public entry point (see deploy/nginx.conf.example / DEPLOY.md),
-// so the last hop it appends to X-Forwarded-For is the real client IP. Earlier,
-// comma-separated values are client-supplied and not trustworthy.
-async function getClientIp() {
-  const forwardedFor = (await headers()).get("x-forwarded-for");
-  const parts = forwardedFor?.split(",").map((p) => p.trim()).filter(Boolean) ?? [];
-  return parts.at(-1) ?? "unknown";
-}
 
 export default async function LoginPage({
   searchParams,
@@ -23,37 +12,14 @@ export default async function LoginPage({
 }) {
   const { callbackUrl, error } = await searchParams;
 
-  async function login(formData: FormData) {
-    "use server";
-    const email = (formData.get("email") as string).trim().toLowerCase();
-    const ip = await getClientIp();
-
-    // 1 email per address per minute, 5 attempts per IP per 10 minutes — stops
-    // one submitter from spamming an unrelated address, or one source from
-    // spraying sign-in emails at many addresses.
-    const emailOk = checkRateLimit(`login:email:${email}`, 1, 60 * 1000);
-    const ipOk = checkRateLimit(`login:ip:${ip}`, 5, 10 * 60 * 1000);
-
-    if (!emailOk || !ipOk) {
-      const params = new URLSearchParams({ error: "rate_limited" });
-      if (callbackUrl) params.set("callbackUrl", callbackUrl);
-      redirect(`/login?${params.toString()}`);
-    }
-
-    await signIn("resend", {
-      email,
-      redirectTo: callbackUrl || "/dashboard",
-    });
-  }
-
   return (
-    <div className="mx-auto flex max-w-md flex-col justify-center px-4 py-24">
+    <div className="mx-auto flex max-w-md flex-col justify-center gap-6 px-4 py-24">
       <Card>
         <CardHeader>
           <CardTitle>Sign in</CardTitle>
           <CardDescription>
-            Enter your email address and we&apos;ll send you a sign-in link. Authors, reviewers,
-            and organizers all sign in the same way.
+            Enter your email address and we&apos;ll send you a sign-in link. This works for
+            everyone, including your first time here.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -62,7 +28,8 @@ export default async function LoginPage({
               Too many sign-in requests. Please wait a minute and try again.
             </p>
           )}
-          <form action={login} className="space-y-4">
+          <form action={loginWithLinkAction} className="space-y-4">
+            <input type="hidden" name="callbackUrl" value={callbackUrl ?? ""} />
             <div className="space-y-2">
               <Label htmlFor="email">Email address</Label>
               <Input
@@ -78,6 +45,25 @@ export default async function LoginPage({
               Send sign-in link
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <div className="h-px flex-1 bg-border" />
+        OR
+        <div className="h-px flex-1 bg-border" />
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Sign in with a password</CardTitle>
+          <CardDescription>
+            Only works if you&apos;ve set a password already (from{" "}
+            <span className="font-medium">Set Password</span> after signing in once).
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <PasswordLoginForm callbackUrl={callbackUrl} />
         </CardContent>
       </Card>
     </div>
