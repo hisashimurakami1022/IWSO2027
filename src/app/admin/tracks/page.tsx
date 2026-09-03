@@ -2,12 +2,14 @@ import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ReorderButtons } from "@/components/reorder-buttons";
 import { TrackFormDialog } from "./track-form-dialog";
 import { DeleteTrackButton } from "./delete-track-button";
+import { reorderTrackAction } from "./actions";
 
 export default async function TracksPage() {
   const tracks = await prisma.track.findMany({
-    orderBy: { name: "asc" },
+    orderBy: [{ order: "asc" }, { name: "asc" }],
     include: { _count: { select: { submissions: true } } },
   });
 
@@ -29,6 +31,7 @@ export default async function TracksPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead />
                 <TableHead>Code</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Description</TableHead>
@@ -37,8 +40,16 @@ export default async function TracksPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tracks.map((t) => (
+              {tracks.map((t, i) => (
                 <TableRow key={t.id}>
+                  <TableCell>
+                    <ReorderButtons
+                      id={t.id}
+                      isFirst={i === 0}
+                      isLast={i === tracks.length - 1}
+                      action={reorderTrackAction}
+                    />
+                  </TableCell>
                   <TableCell className="font-mono text-xs">{t.code}</TableCell>
                   <TableCell>{t.name}</TableCell>
                   <TableCell className="max-w-xs truncate text-muted-foreground">

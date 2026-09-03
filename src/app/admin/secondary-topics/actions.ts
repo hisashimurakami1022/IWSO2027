@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { requireChair } from "@/lib/session";
 import { reorderList } from "@/lib/reorder";
 
-const researchTopicSchema = z.object({
+const secondaryTopicSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
   code: z
     .string()
@@ -17,20 +17,20 @@ const researchTopicSchema = z.object({
   description: z.string().trim().max(500).optional().or(z.literal("")),
 });
 
-export type ResearchTopicActionState = {
+export type SecondaryTopicActionState = {
   errors?: Record<string, string[]>;
   message?: string;
   success?: boolean;
 };
 
-export async function saveResearchTopicAction(
-  prevState: ResearchTopicActionState,
+export async function saveSecondaryTopicAction(
+  prevState: SecondaryTopicActionState,
   formData: FormData
-): Promise<ResearchTopicActionState> {
+): Promise<SecondaryTopicActionState> {
   await requireChair();
   const id = (formData.get("id") as string) || null;
 
-  const parsed = researchTopicSchema.safeParse({
+  const parsed = secondaryTopicSchema.safeParse({
     name: formData.get("name"),
     code: formData.get("code"),
     description: formData.get("description"),
@@ -47,37 +47,37 @@ export async function saveResearchTopicAction(
 
   try {
     if (id) {
-      await prisma.researchTopic.update({ where: { id }, data });
+      await prisma.secondaryTopic.update({ where: { id }, data });
     } else {
-      await prisma.researchTopic.create({ data });
+      await prisma.secondaryTopic.create({ data });
     }
   } catch {
-    return { message: "A research topic with this code already exists." };
+    return { message: "A secondary topic with this code already exists." };
   }
 
-  revalidatePath("/admin/research-topics");
+  revalidatePath("/admin/secondary-topics");
   return { success: true };
 }
 
-export async function deleteResearchTopicAction(id: string) {
+export async function deleteSecondaryTopicAction(id: string) {
   await requireChair();
-  const count = await prisma.submission.count({ where: { primaryTopicId: id } });
+  const count = await prisma.submission.count({ where: { secondaryTopicId: id } });
   if (count > 0) {
-    throw new Error("Cannot delete a research topic that has submissions.");
+    throw new Error("Cannot delete a secondary topic that has submissions.");
   }
-  await prisma.researchTopic.delete({ where: { id } });
-  revalidatePath("/admin/research-topics");
+  await prisma.secondaryTopic.delete({ where: { id } });
+  revalidatePath("/admin/secondary-topics");
 }
 
-export async function reorderResearchTopicAction(id: string, direction: "up" | "down") {
+export async function reorderSecondaryTopicAction(id: string, direction: "up" | "down") {
   await requireChair();
-  const researchTopics = await prisma.researchTopic.findMany({
+  const secondaryTopics = await prisma.secondaryTopic.findMany({
     orderBy: [{ order: "asc" }, { name: "asc" }],
   });
-  const updates = reorderList(researchTopics, id, direction);
+  const updates = reorderList(secondaryTopics, id, direction);
   if (!updates) return;
   await prisma.$transaction(
-    updates.map((u) => prisma.researchTopic.update({ where: { id: u.id }, data: { order: u.order } }))
+    updates.map((u) => prisma.secondaryTopic.update({ where: { id: u.id }, data: { order: u.order } }))
   );
-  revalidatePath("/admin/research-topics");
+  revalidatePath("/admin/secondary-topics");
 }

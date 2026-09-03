@@ -10,6 +10,7 @@ const links = [
   { href: "/admin/tracks", label: "Tracks" },
   { href: "/admin/material-systems", label: "Material Systems" },
   { href: "/admin/research-topics", label: "Research Topics" },
+  { href: "/admin/secondary-topics", label: "Secondary Topics" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/settings", label: "Settings" },
 ];

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireChair } from "@/lib/session";
+import { reorderList } from "@/lib/reorder";
 
 const trackSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -65,5 +66,16 @@ export async function deleteTrackAction(id: string) {
     throw new Error("Cannot delete a track that has submissions.");
   }
   await prisma.track.delete({ where: { id } });
+  revalidatePath("/admin/tracks");
+}
+
+export async function reorderTrackAction(id: string, direction: "up" | "down") {
+  await requireChair();
+  const tracks = await prisma.track.findMany({ orderBy: [{ order: "asc" }, { name: "asc" }] });
+  const updates = reorderList(tracks, id, direction);
+  if (!updates) return;
+  await prisma.$transaction(
+    updates.map((u) => prisma.track.update({ where: { id: u.id }, data: { order: u.order } }))
+  );
   revalidatePath("/admin/tracks");
 }

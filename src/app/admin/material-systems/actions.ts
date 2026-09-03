@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireChair } from "@/lib/session";
+import { reorderList } from "@/lib/reorder";
 
 const materialSystemSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -65,5 +66,18 @@ export async function deleteMaterialSystemAction(id: string) {
     throw new Error("Cannot delete a material system that has submissions.");
   }
   await prisma.materialSystem.delete({ where: { id } });
+  revalidatePath("/admin/material-systems");
+}
+
+export async function reorderMaterialSystemAction(id: string, direction: "up" | "down") {
+  await requireChair();
+  const materialSystems = await prisma.materialSystem.findMany({
+    orderBy: [{ order: "asc" }, { name: "asc" }],
+  });
+  const updates = reorderList(materialSystems, id, direction);
+  if (!updates) return;
+  await prisma.$transaction(
+    updates.map((u) => prisma.materialSystem.update({ where: { id: u.id }, data: { order: u.order } }))
+  );
   revalidatePath("/admin/material-systems");
 }

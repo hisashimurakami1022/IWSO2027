@@ -3,32 +3,33 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ReorderButtons } from "@/components/reorder-buttons";
-import { ResearchTopicFormDialog } from "./research-topic-form-dialog";
-import { DeleteResearchTopicButton } from "./delete-research-topic-button";
-import { reorderResearchTopicAction } from "./actions";
+import { SecondaryTopicFormDialog } from "./secondary-topic-form-dialog";
+import { DeleteSecondaryTopicButton } from "./delete-secondary-topic-button";
+import { reorderSecondaryTopicAction } from "./actions";
 
-export default async function ResearchTopicsPage() {
-  const researchTopics = await prisma.researchTopic.findMany({
+export default async function SecondaryTopicsPage() {
+  const secondaryTopics = await prisma.secondaryTopic.findMany({
     orderBy: [{ order: "asc" }, { name: "asc" }],
     include: { _count: { select: { submissions: true } } },
   });
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Research Topics</h1>
-          <p className="text-muted-foreground">
-            Used as the Primary Research Topic when submitting. See also Secondary Topics.
-          </p>
+      <div>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-semibold">Secondary Topics</h1>
+          <SecondaryTopicFormDialog trigger={<Button>New Secondary Topic</Button>} />
         </div>
-        <ResearchTopicFormDialog trigger={<Button>New Research Topic</Button>} />
+        <p className="text-muted-foreground">
+          Used as the optional Secondary Research Topic when submitting — an independent list
+          from the (Primary) Research Topics.
+        </p>
       </div>
 
-      {researchTopics.length === 0 ? (
+      {secondaryTopics.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-muted-foreground">
-            No research topics yet.
+            No secondary topics yet.
           </CardContent>
         </Card>
       ) : (
@@ -45,14 +46,14 @@ export default async function ResearchTopicsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {researchTopics.map((t, i) => (
+              {secondaryTopics.map((t, i) => (
                 <TableRow key={t.id}>
                   <TableCell>
                     <ReorderButtons
                       id={t.id}
                       isFirst={i === 0}
-                      isLast={i === researchTopics.length - 1}
-                      action={reorderResearchTopicAction}
+                      isLast={i === secondaryTopics.length - 1}
+                      action={reorderSecondaryTopicAction}
                     />
                   </TableCell>
                   <TableCell className="font-mono text-xs">{t.code}</TableCell>
@@ -62,15 +63,15 @@ export default async function ResearchTopicsPage() {
                   </TableCell>
                   <TableCell>{t._count.submissions}</TableCell>
                   <TableCell className="flex justify-end gap-2">
-                    <ResearchTopicFormDialog
-                      researchTopic={t}
+                    <SecondaryTopicFormDialog
+                      secondaryTopic={t}
                       trigger={
                         <Button variant="outline" size="sm">
                           Edit
                         </Button>
                       }
                     />
-                    <DeleteResearchTopicButton id={t.id} disabled={t._count.submissions > 0} />
+                    <DeleteSecondaryTopicButton id={t.id} disabled={t._count.submissions > 0} />
                   </TableCell>
                 </TableRow>
               ))}

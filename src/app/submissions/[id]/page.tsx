@@ -15,7 +15,7 @@ export default async function SubmissionDetailPage({
   const { id } = await params;
   const user = await requireUser();
 
-  const [submission, tracks, materialSystems, researchTopics] = await Promise.all([
+  const [submission, tracks, materialSystems, primaryTopics, secondaryTopics] = await Promise.all([
     prisma.submission.findUnique({
       where: { id },
       include: {
@@ -24,9 +24,10 @@ export default async function SubmissionDetailPage({
         reviews: true,
       },
     }),
-    prisma.track.findMany({ orderBy: { name: "asc" } }),
-    prisma.materialSystem.findMany({ orderBy: { name: "asc" } }),
-    prisma.researchTopic.findMany({ orderBy: { name: "asc" } }),
+    prisma.track.findMany({ orderBy: [{ order: "asc" }, { name: "asc" }] }),
+    prisma.materialSystem.findMany({ orderBy: [{ order: "asc" }, { name: "asc" }] }),
+    prisma.researchTopic.findMany({ orderBy: [{ order: "asc" }, { name: "asc" }] }),
+    prisma.secondaryTopic.findMany({ orderBy: [{ order: "asc" }, { name: "asc" }] }),
   ]);
 
   if (!submission || submission.submitterId !== user.id) {
@@ -62,7 +63,8 @@ export default async function SubmissionDetailPage({
             <SubmissionForm
               tracks={tracks}
               materialSystems={materialSystems}
-              researchTopics={researchTopics}
+              primaryTopics={primaryTopics}
+              secondaryTopics={secondaryTopics}
               defaultValues={{
                 id: submission.id,
                 title: submission.title,

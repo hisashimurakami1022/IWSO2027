@@ -7,10 +7,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default async function NewSubmissionPage() {
   const user = await requireUser();
-  const [tracks, materialSystems, researchTopics, open] = await Promise.all([
-    prisma.track.findMany({ orderBy: { name: "asc" } }),
-    prisma.materialSystem.findMany({ orderBy: { name: "asc" } }),
-    prisma.researchTopic.findMany({ orderBy: { name: "asc" } }),
+  const [tracks, materialSystems, primaryTopics, secondaryTopics, open] = await Promise.all([
+    prisma.track.findMany({ orderBy: [{ order: "asc" }, { name: "asc" }] }),
+    prisma.materialSystem.findMany({ orderBy: [{ order: "asc" }, { name: "asc" }] }),
+    prisma.researchTopic.findMany({ orderBy: [{ order: "asc" }, { name: "asc" }] }),
+    prisma.secondaryTopic.findMany({ orderBy: [{ order: "asc" }, { name: "asc" }] }),
     isSubmissionOpen(),
   ]);
 
@@ -38,7 +39,8 @@ export default async function NewSubmissionPage() {
           <SubmissionForm
             tracks={tracks}
             materialSystems={materialSystems}
-            researchTopics={researchTopics}
+            primaryTopics={primaryTopics}
+            secondaryTopics={secondaryTopics}
             defaultValues={{
               title: "",
               trackId: "",

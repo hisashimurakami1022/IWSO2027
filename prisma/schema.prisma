@@ -119,6 +119,7 @@ model Track {
   name        String
   code        String   @unique
   description String?
+  order       Int      @default(0)
   createdAt   DateTime @default(now())
 
   submissions       Submission[]
@@ -172,8 +173,8 @@ model Submission {
 
   track             Track                      @relation(fields: [trackId], references: [id])
   materialSystem    MaterialSystem?            @relation(fields: [materialSystemId], references: [id])
-  primaryTopic      ResearchTopic?             @relation("PrimaryTopic", fields: [primaryTopicId], references: [id])
-  secondaryTopic    ResearchTopic?             @relation("SecondaryTopic", fields: [secondaryTopicId], references: [id])
+  primaryTopic      ResearchTopic?             @relation(fields: [primaryTopicId], references: [id])
+  secondaryTopic    SecondaryTopic?            @relation(fields: [secondaryTopicId], references: [id])
   submitter         User                       @relation("Submitter", fields: [submitterId], references: [id])
   authors           SubmissionAuthor[]
   file              SubmissionFile?
@@ -188,20 +189,35 @@ model MaterialSystem {
   name        String
   code        String   @unique
   description String?
+  order       Int      @default(0)
   createdAt   DateTime @default(now())
 
   submissions Submission[]
 }
 
+// Primary Research Topic options.
 model ResearchTopic {
   id          String   @id @default(cuid())
   name        String
   code        String   @unique
   description String?
+  order       Int      @default(0)
   createdAt   DateTime @default(now())
 
-  primarySubmissions   Submission[] @relation("PrimaryTopic")
-  secondarySubmissions Submission[] @relation("SecondaryTopic")
+  submissions Submission[]
+}
+
+// Secondary Research Topic options — a separate, independently-managed list
+// from ResearchTopic (not a subcategory of a chosen primary topic).
+model SecondaryTopic {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  description String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  submissions Submission[]
 }
 
 model SubmissionAuthor {

@@ -2,12 +2,14 @@ import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ReorderButtons } from "@/components/reorder-buttons";
 import { MaterialSystemFormDialog } from "./material-system-form-dialog";
 import { DeleteMaterialSystemButton } from "./delete-material-system-button";
+import { reorderMaterialSystemAction } from "./actions";
 
 export default async function MaterialSystemsPage() {
   const materialSystems = await prisma.materialSystem.findMany({
-    orderBy: { name: "asc" },
+    orderBy: [{ order: "asc" }, { name: "asc" }],
     include: { _count: { select: { submissions: true } } },
   });
 
@@ -29,6 +31,7 @@ export default async function MaterialSystemsPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead />
                 <TableHead>Code</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Description</TableHead>
@@ -37,8 +40,16 @@ export default async function MaterialSystemsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {materialSystems.map((m) => (
+              {materialSystems.map((m, i) => (
                 <TableRow key={m.id}>
+                  <TableCell>
+                    <ReorderButtons
+                      id={m.id}
+                      isFirst={i === 0}
+                      isLast={i === materialSystems.length - 1}
+                      action={reorderMaterialSystemAction}
+                    />
+                  </TableCell>
                   <TableCell className="font-mono text-xs">{m.code}</TableCell>
                   <TableCell>{m.name}</TableCell>
                   <TableCell className="max-w-xs truncate text-muted-foreground">

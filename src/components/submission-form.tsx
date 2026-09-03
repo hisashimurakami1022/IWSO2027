@@ -19,6 +19,7 @@ import { PRESENTATION_TYPE_LABELS } from "@/lib/labels";
 type Track = { id: string; name: string };
 type MaterialSystem = { id: string; name: string };
 type ResearchTopic = { id: string; name: string };
+type SecondaryTopic = { id: string; name: string };
 
 type Author = {
   name: string;
@@ -47,12 +48,14 @@ const initialState: SubmissionActionState = {};
 export function SubmissionForm({
   tracks,
   materialSystems,
-  researchTopics,
+  primaryTopics,
+  secondaryTopics,
   defaultValues,
 }: {
   tracks: Track[];
   materialSystems: MaterialSystem[];
-  researchTopics: ResearchTopic[];
+  primaryTopics: ResearchTopic[];
+  secondaryTopics: SecondaryTopic[];
   defaultValues?: SubmissionFormValues;
 }) {
   const [state, formAction, isPending] = useActionState(saveSubmissionAction, initialState);
@@ -179,12 +182,12 @@ export function SubmissionForm({
             <SelectTrigger id="primaryTopicId" className="w-full">
               <SelectValue placeholder="Select a primary topic">
                 {(value: string | null) =>
-                  researchTopics.find((t) => t.id === value)?.name ?? "Select a primary topic"
+                  primaryTopics.find((t) => t.id === value)?.name ?? "Select a primary topic"
                 }
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {researchTopics.map((t) => (
+              {primaryTopics.map((t) => (
                 <SelectItem key={t.id} value={t.id}>
                   {t.name}
                 </SelectItem>
@@ -202,11 +205,11 @@ export function SubmissionForm({
         <Select name="secondaryTopicId" defaultValue={defaultValues?.secondaryTopicId || undefined}>
           <SelectTrigger id="secondaryTopicId" className="w-full">
             <SelectValue placeholder="None">
-              {(value: string | null) => researchTopics.find((t) => t.id === value)?.name ?? "None"}
+              {(value: string | null) => secondaryTopics.find((t) => t.id === value)?.name ?? "None"}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {researchTopics.map((t) => (
+            {secondaryTopics.map((t) => (
               <SelectItem key={t.id} value={t.id}>
                 {t.name}
               </SelectItem>
