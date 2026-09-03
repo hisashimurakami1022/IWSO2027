@@ -11,7 +11,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { SUBMISSION_STATUS_LABELS, PRESENTATION_TYPE_LABELS } from "@/lib/labels";
+import {
+  SUBMISSION_STATUS_LABELS,
+  PRESENTATION_TYPE_LABELS,
+  REVIEW_RATING_VALUES,
+} from "@/lib/labels";
 import type { SubmissionStatus } from "@/generated/prisma/client";
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
@@ -25,17 +29,38 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "outline" | "dest
 export default async function AdminSubmissionsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; sort?: string }>;
 }) {
-  const { status } = await searchParams;
+  const { status, sort } = await searchParams;
 
-  const submissions = await prisma.submission.findMany({
+  const rows = await prisma.submission.findMany({
     where: status ? { status: status as SubmissionStatus } : {},
-    include: { track: true, submitter: true },
+    include: {
+      track: true,
+      submitter: true,
+      reviews: { where: { submittedAt: { not: null } }, select: { rating: true } },
+    },
     orderBy: { createdAt: "desc" },
   });
 
+  const submissions = rows.map((s) => {
+    const ratedReviews = s.reviews
+      .map((r) => (r.rating ? REVIEW_RATING_VALUES[r.rating] : undefined))
+      .filter((v): v is number => typeof v === "number");
+    return {
+      ...s,
+      totalRating: ratedReviews.reduce((sum, v) => sum + v, 0),
+      ratedReviewCount: ratedReviews.length,
+      reviewCount: s.reviews.length,
+    };
+  });
+
+  if (sort === "rating") {
+    submissions.sort((a, b) => b.totalRating - a.totalRating);
+  }
+
   const exportQuery = status ? `?status=${status}` : "";
+  const sortQuery = new URLSearchParams({ ...(status ? { status } : {}), sort: "rating" }).toString();
 
   return (
     <div className="space-y-6">
@@ -76,6 +101,20 @@ export default async function AdminSubmissionsPage({
               <TableHead>Track</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>
+                {sort === "rating" ? (
+                  <Link
+                    href={`/admin/submissions${status ? `?status=${status}` : ""}`}
+                    className="hover:underline"
+                  >
+                    Rating &darr;
+                  </Link>
+                ) : (
+                  <Link href={`/admin/submissions?${sortQuery}`} className="hover:underline">
+                    Rating
+                  </Link>
+                )}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -94,11 +133,25 @@ export default async function AdminSubmissionsPage({
                     {SUBMISSION_STATUS_LABELS[s.status]}
                   </Badge>
                 </TableCell>
+                <TableCell>
+                  {s.reviewCount > 0 ? (
+                    <span className="flex items-center gap-1.5">
+                      <span className="font-mono font-medium">
+                        {s.totalRating > 0 ? `+${s.totalRating}` : s.totalRating}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        ({s.ratedReviewCount}/{s.reviewCount} rated)
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </TableCell>
               </TableRow>
             ))}
             {submissions.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
                   No submissions found.
                 </TableCell>
               </TableRow>

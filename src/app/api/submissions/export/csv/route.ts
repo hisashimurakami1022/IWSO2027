@@ -6,6 +6,7 @@ import {
   DECISION_LABELS,
   PRESENTATION_TYPE_LABELS,
   PRESENTATION_CATEGORY_LABELS,
+  REVIEW_RATING_VALUES,
 } from "@/lib/labels";
 import { toCsv } from "@/lib/csv";
 import type { SubmissionStatus } from "@/generated/prisma/client";
@@ -24,6 +25,7 @@ export async function GET(request: Request) {
       secondaryTopic: true,
       submitter: true,
       authors: { orderBy: { order: "asc" } },
+      reviews: { where: { submittedAt: { not: null } }, select: { rating: true } },
     },
     orderBy: { createdAt: "asc" },
   });
@@ -40,6 +42,8 @@ export async function GET(request: Request) {
       "Keywords",
       "Status",
       "Decision",
+      "Total Rating",
+      "Rated Reviews",
       "Submitter Email",
       "Author Names",
       "Author Emails",
@@ -51,6 +55,10 @@ export async function GET(request: Request) {
 
   for (const s of submissions) {
     const correspondingAuthor = s.authors.find((a) => a.isCorresponding);
+    const ratedReviews = s.reviews
+      .map((r) => (r.rating ? REVIEW_RATING_VALUES[r.rating] : undefined))
+      .filter((v): v is number => typeof v === "number");
+    const totalRating = ratedReviews.reduce((sum, v) => sum + v, 0);
     rows.push([
       s.title,
       s.track.name,
@@ -62,6 +70,8 @@ export async function GET(request: Request) {
       s.keywords.join("; "),
       SUBMISSION_STATUS_LABELS[s.status],
       s.decision ? DECISION_LABELS[s.decision] : "",
+      s.reviews.length > 0 ? String(totalRating) : "",
+      `${ratedReviews.length}/${s.reviews.length}`,
       s.submitter.email,
       s.authors.map((a) => a.name).join("; "),
       s.authors.map((a) => a.email).join("; "),
