@@ -8,6 +8,7 @@ import { submissionSchema, MAX_ABSTRACT_FILE_SIZE, ABSTRACT_FILE_MIME_TYPE } fro
 import { getConferenceSettings, isSubmissionOpen } from "@/lib/settings";
 import { sendNotification } from "@/lib/notifications";
 import { APP_URL } from "@/lib/app-url";
+import { allocateSubmissionCode } from "@/lib/submission-code";
 import { SubmissionConfirmationEmail } from "@/emails/submission-confirmation";
 
 export type SubmissionActionState = {
@@ -36,6 +37,7 @@ function parseFormData(formData: FormData) {
     primaryTopicId: formData.get("primaryTopicId"),
     secondaryTopicId: formData.get("secondaryTopicId"),
     presentationType: formData.get("presentationType"),
+    presentationCategory: formData.get("presentationCategory"),
     keywords,
     authors,
   };
@@ -99,6 +101,14 @@ export async function saveSubmissionAction(
     order: i,
   }));
 
+  // Assigned once, at the moment a submission is first finalized — never
+  // reassigned on later edits (the Presentation Category field locks once
+  // this exists, so the two can't drift apart).
+  const submissionCode =
+    status === "SUBMITTED" && !wasSubmitted
+      ? await allocateSubmissionCode(data.presentationCategory)
+      : undefined;
+
   const submission = existing
     ? await prisma.submission.update({
         where: { id: existing.id },
@@ -109,8 +119,10 @@ export async function saveSubmissionAction(
           primaryTopicId: data.primaryTopicId,
           secondaryTopicId: data.secondaryTopicId || null,
           presentationType: data.presentationType,
+          presentationCategory: data.presentationCategory,
           keywords: data.keywords,
           status,
+          ...(submissionCode ? { submissionCode } : {}),
           submittedAt:
             status === "SUBMITTED" ? (existing.submittedAt ?? new Date()) : existing.submittedAt,
           authors: {
@@ -127,8 +139,10 @@ export async function saveSubmissionAction(
           primaryTopicId: data.primaryTopicId,
           secondaryTopicId: data.secondaryTopicId || null,
           presentationType: data.presentationType,
+          presentationCategory: data.presentationCategory,
           keywords: data.keywords,
           status,
+          ...(submissionCode ? { submissionCode } : {}),
           submitterId: user.id,
           submittedAt: status === "SUBMITTED" ? new Date() : null,
           authors: { create: authorsData },
@@ -163,6 +177,7 @@ export async function saveSubmissionAction(
         title: submission.title,
         conferenceName: settings.conferenceName,
         submissionUrl: `${APP_URL}/submissions/${submission.id}`,
+        submissionCode: submission.submissionCode,
       }),
     });
   }

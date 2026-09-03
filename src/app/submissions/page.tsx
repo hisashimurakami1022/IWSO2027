@@ -48,6 +48,8 @@ export default async function SubmissionsPage() {
                     {s.title}
                   </Link>
                   <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                    {s.submissionCode && <span className="font-mono">{s.submissionCode}</span>}
+                    {s.submissionCode && <span>&middot;</span>}
                     <span>{s.track.name}</span>
                     <span>&middot;</span>
                     <span>{PRESENTATION_TYPE_LABELS[s.presentationType]}</span>

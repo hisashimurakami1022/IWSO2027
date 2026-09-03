@@ -52,6 +52,11 @@ export default async function AdminSubmissionDetailPage({
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">{submission.title}</h1>
+        {submission.submissionCode && (
+          <p className="mt-1 font-mono text-sm text-muted-foreground">
+            {submission.submissionCode}
+          </p>
+        )}
         <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           <Badge>{SUBMISSION_STATUS_LABELS[submission.status]}</Badge>
           {submission.decision && (

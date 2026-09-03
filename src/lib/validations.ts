@@ -14,6 +14,7 @@ export const submissionSchema = z.object({
   primaryTopicId: z.string().min(1, "Select a primary research topic"),
   secondaryTopicId: z.string().optional().or(z.literal("")),
   presentationType: z.enum(["ORAL", "POSTER"]),
+  presentationCategory: z.enum(["GENERAL", "INVITED"]),
   keywords: z.array(z.string().trim().min(1)).max(10),
   authors: z.array(submissionAuthorSchema).min(1, "At least one author is required"),
 });

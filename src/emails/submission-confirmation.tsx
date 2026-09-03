@@ -4,10 +4,12 @@ export function SubmissionConfirmationEmail({
   title,
   conferenceName,
   submissionUrl,
+  submissionCode,
 }: {
   title: string;
   conferenceName: string;
   submissionUrl: string;
+  submissionCode?: string | null;
 }) {
   return (
     <Html>
@@ -21,6 +23,12 @@ export function SubmissionConfirmationEmail({
             submission:
           </Text>
           <Text style={{ fontWeight: "bold", fontSize: "16px" }}>{title}</Text>
+          {submissionCode && (
+            <Text>
+              Your submission ID is <strong>{submissionCode}</strong>. Please refer to this ID in
+              any correspondence about your submission.
+            </Text>
+          )}
           <Text>
             We will notify you of the review outcome by email before the notification date. You
             may continue to edit your submission until the submission deadline.

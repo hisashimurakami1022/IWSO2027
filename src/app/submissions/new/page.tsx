@@ -48,6 +48,7 @@ export default async function NewSubmissionPage() {
               primaryTopicId: "",
               secondaryTopicId: "",
               presentationType: "ORAL",
+              presentationCategory: "GENERAL",
               keywords: [],
               authors: [
                 {

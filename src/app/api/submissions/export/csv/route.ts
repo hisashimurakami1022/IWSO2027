@@ -32,6 +32,7 @@ export async function GET(request: Request) {
 
   const rows: string[][] = [
     [
+      "Submission ID",
       "Title",
       "Track",
       "Material System",
@@ -60,6 +61,7 @@ export async function GET(request: Request) {
       .filter((v): v is number => typeof v === "number");
     const totalRating = ratedReviews.reduce((sum, v) => sum + v, 0);
     rows.push([
+      s.submissionCode ?? "",
       s.title,
       s.track.name,
       s.materialSystem?.name ?? "",

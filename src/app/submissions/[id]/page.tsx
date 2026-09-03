@@ -42,6 +42,11 @@ export default async function SubmissionDetailPage({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">{submission.title}</h1>
+          {submission.submissionCode && (
+            <p className="mt-1 font-mono text-sm text-muted-foreground">
+              {submission.submissionCode}
+            </p>
+          )}
           <div className="mt-2 flex flex-wrap gap-2">
             <Badge>{SUBMISSION_STATUS_LABELS[submission.status]}</Badge>
             {submission.decision && (
@@ -73,6 +78,8 @@ export default async function SubmissionDetailPage({
                 primaryTopicId: submission.primaryTopicId ?? "",
                 secondaryTopicId: submission.secondaryTopicId ?? "",
                 presentationType: submission.presentationType,
+                presentationCategory: submission.presentationCategory,
+                submissionCode: submission.submissionCode,
                 keywords: submission.keywords,
                 authors: submission.authors.map((a) => ({
                   name: a.name,

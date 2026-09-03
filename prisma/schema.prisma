@@ -161,6 +161,7 @@ model ConferenceSettings {
 
 model Submission {
   id                   String               @id @default(cuid())
+  submissionCode       String?              @unique
   title                String
   keywords             String[]             @default([])
   presentationType     PresentationType     @default(ORAL)
@@ -189,6 +190,14 @@ model Submission {
   reviews           Review[]
   notificationLogs  NotificationLog[]
   programSessions   ProgramSessionSubmission[]
+}
+
+// Atomic per-category counter backing Submission.submissionCode
+// (C0001.., I0001..). Upserting with an increment is a single, row-locking
+// SQL statement, so concurrent submissions can't be handed the same number.
+model SubmissionCounter {
+  category     PresentationCategory @id
+  lastAssigned Int                  @default(0)
 }
 
 model MaterialSystem {

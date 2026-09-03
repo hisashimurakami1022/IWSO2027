@@ -96,6 +96,7 @@ export default async function AdminSubmissionsPage({
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>ID</TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Submitter</TableHead>
               <TableHead>Track</TableHead>
@@ -120,6 +121,9 @@ export default async function AdminSubmissionsPage({
           <TableBody>
             {submissions.map((s) => (
               <TableRow key={s.id}>
+                <TableCell className="font-mono text-xs text-muted-foreground">
+                  {s.submissionCode ?? "—"}
+                </TableCell>
                 <TableCell>
                   <Link href={`/admin/submissions/${s.id}`} className="font-medium hover:underline">
                     {s.title}
@@ -151,7 +155,7 @@ export default async function AdminSubmissionsPage({
             ))}
             {submissions.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
                   No submissions found.
                 </TableCell>
               </TableRow>

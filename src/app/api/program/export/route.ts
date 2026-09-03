@@ -41,6 +41,7 @@ export async function GET() {
       "Session",
       "Type",
       "Room",
+      "Submission ID",
       "Submission Title",
       "Material System",
       "Primary Research Topic",
@@ -73,6 +74,7 @@ export async function GET() {
         "",
         "",
         "",
+        "",
       ]);
       continue;
     }
@@ -81,6 +83,7 @@ export async function GET() {
         session.title,
         PROGRAM_SESSION_TYPE_LABELS[session.type],
         session.room ?? "",
+        ps.submission.submissionCode ?? "",
         ps.submission.title,
         ps.submission.materialSystem?.name ?? "",
         ps.submission.primaryTopic?.name ?? "",

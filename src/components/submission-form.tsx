@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PRESENTATION_TYPE_LABELS } from "@/lib/labels";
+import { PRESENTATION_TYPE_LABELS, PRESENTATION_CATEGORY_LABELS } from "@/lib/labels";
 
 type Track = { id: string; name: string };
 type MaterialSystem = { id: string; name: string };
@@ -36,6 +36,8 @@ type SubmissionFormValues = {
   primaryTopicId: string;
   secondaryTopicId: string;
   presentationType: "ORAL" | "POSTER";
+  presentationCategory: "GENERAL" | "INVITED";
+  submissionCode?: string | null;
   keywords: string[];
   authors: Author[];
   existingFileName?: string | null;
@@ -150,6 +152,51 @@ export function SubmissionForm({
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="presentationCategory">Presentation Category</Label>
+        {defaultValues?.submissionCode ? (
+          <>
+            <input
+              type="hidden"
+              name="presentationCategory"
+              value={defaultValues.presentationCategory}
+            />
+            <p className="text-sm">
+              {PRESENTATION_CATEGORY_LABELS[defaultValues.presentationCategory]}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Locked — your submission ID ({defaultValues.submissionCode}) was already assigned
+              based on this. Contact the Chair if it needs to change.
+            </p>
+          </>
+        ) : (
+          <>
+            <Select
+              name="presentationCategory"
+              defaultValue={defaultValues?.presentationCategory ?? "GENERAL"}
+            >
+              <SelectTrigger id="presentationCategory" className="w-full">
+                <SelectValue>
+                  {(value: keyof typeof PRESENTATION_CATEGORY_LABELS) =>
+                    PRESENTATION_CATEGORY_LABELS[value]
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(PRESENTATION_CATEGORY_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Only select Invited if the Chair has invited you to give this talk.
+            </p>
+          </>
+        )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
