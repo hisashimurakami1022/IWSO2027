@@ -8,6 +8,8 @@ const links = [
   { href: "/admin/decisions", label: "Decisions" },
   { href: "/admin/program", label: "Program" },
   { href: "/admin/tracks", label: "Tracks" },
+  { href: "/admin/material-systems", label: "Material Systems" },
+  { href: "/admin/research-topics", label: "Research Topics" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/settings", label: "Settings" },
 ];

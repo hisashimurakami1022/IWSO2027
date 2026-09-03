@@ -19,7 +19,14 @@ export async function GET() {
       include: {
         submissions: {
           include: {
-            submission: { include: { authors: { orderBy: { order: "asc" } } } },
+            submission: {
+              include: {
+                authors: { orderBy: { order: "asc" } },
+                materialSystem: true,
+                primaryTopic: true,
+                secondaryTopic: true,
+              },
+            },
           },
           orderBy: { orderIndex: "asc" },
         },
@@ -30,7 +37,18 @@ export async function GET() {
   ]);
 
   const rows: string[][] = [
-    ["Session", "Type", "Room", "Submission Title", "Talk Time", "Authors", "Affiliations"],
+    [
+      "Session",
+      "Type",
+      "Room",
+      "Submission Title",
+      "Material System",
+      "Primary Research Topic",
+      "Secondary Research Topic",
+      "Talk Time",
+      "Authors",
+      "Affiliations",
+    ],
   ];
 
   for (const session of sessions) {
@@ -44,7 +62,18 @@ export async function GET() {
         : null;
 
     if (session.submissions.length === 0) {
-      rows.push([session.title, PROGRAM_SESSION_TYPE_LABELS[session.type], session.room ?? "", "", "", "", ""]);
+      rows.push([
+        session.title,
+        PROGRAM_SESSION_TYPE_LABELS[session.type],
+        session.room ?? "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+      ]);
       continue;
     }
     for (const ps of session.submissions) {
@@ -53,6 +82,9 @@ export async function GET() {
         PROGRAM_SESSION_TYPE_LABELS[session.type],
         session.room ?? "",
         ps.submission.title,
+        ps.submission.materialSystem?.name ?? "",
+        ps.submission.primaryTopic?.name ?? "",
+        ps.submission.secondaryTopic?.name ?? "",
         formatTalkTime(slots?.get(ps.submissionId)),
         ps.submission.authors.map((a) => a.name).join("; "),
         ps.submission.authors.map((a) => a.affiliation ?? "").join("; "),

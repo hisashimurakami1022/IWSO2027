@@ -32,6 +32,9 @@ function parseFormData(formData: FormData) {
   return {
     title: formData.get("title"),
     trackId: formData.get("trackId"),
+    materialSystemId: formData.get("materialSystemId"),
+    primaryTopicId: formData.get("primaryTopicId"),
+    secondaryTopicId: formData.get("secondaryTopicId"),
     presentationType: formData.get("presentationType"),
     keywords,
     authors,
@@ -102,6 +105,9 @@ export async function saveSubmissionAction(
         data: {
           title: data.title,
           trackId: data.trackId,
+          materialSystemId: data.materialSystemId,
+          primaryTopicId: data.primaryTopicId,
+          secondaryTopicId: data.secondaryTopicId || null,
           presentationType: data.presentationType,
           keywords: data.keywords,
           status,
@@ -117,6 +123,9 @@ export async function saveSubmissionAction(
         data: {
           title: data.title,
           trackId: data.trackId,
+          materialSystemId: data.materialSystemId,
+          primaryTopicId: data.primaryTopicId,
+          secondaryTopicId: data.secondaryTopicId || null,
           presentationType: data.presentationType,
           keywords: data.keywords,
           status,

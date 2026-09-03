@@ -17,6 +17,8 @@ import {
 import { PRESENTATION_TYPE_LABELS } from "@/lib/labels";
 
 type Track = { id: string; name: string };
+type MaterialSystem = { id: string; name: string };
+type ResearchTopic = { id: string; name: string };
 
 type Author = {
   name: string;
@@ -29,6 +31,9 @@ type SubmissionFormValues = {
   id?: string;
   title: string;
   trackId: string;
+  materialSystemId: string;
+  primaryTopicId: string;
+  secondaryTopicId: string;
   presentationType: "ORAL" | "POSTER";
   keywords: string[];
   authors: Author[];
@@ -41,9 +46,13 @@ const initialState: SubmissionActionState = {};
 
 export function SubmissionForm({
   tracks,
+  materialSystems,
+  researchTopics,
   defaultValues,
 }: {
   tracks: Track[];
+  materialSystems: MaterialSystem[];
+  researchTopics: ResearchTopic[];
   defaultValues?: SubmissionFormValues;
 }) {
   const [state, formAction, isPending] = useActionState(saveSubmissionAction, initialState);
@@ -138,6 +147,72 @@ export function SubmissionForm({
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="materialSystemId">Material System</Label>
+          <Select name="materialSystemId" defaultValue={defaultValues?.materialSystemId}>
+            <SelectTrigger id="materialSystemId" className="w-full">
+              <SelectValue placeholder="Select a material system">
+                {(value: string | null) =>
+                  materialSystems.find((m) => m.id === value)?.name ?? "Select a material system"
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {materialSystems.map((m) => (
+                <SelectItem key={m.id} value={m.id}>
+                  {m.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {state.errors?.materialSystemId && (
+            <p className="text-sm text-destructive">{state.errors.materialSystemId[0]}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="primaryTopicId">Primary Research Topic</Label>
+          <Select name="primaryTopicId" defaultValue={defaultValues?.primaryTopicId}>
+            <SelectTrigger id="primaryTopicId" className="w-full">
+              <SelectValue placeholder="Select a primary topic">
+                {(value: string | null) =>
+                  researchTopics.find((t) => t.id === value)?.name ?? "Select a primary topic"
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {researchTopics.map((t) => (
+                <SelectItem key={t.id} value={t.id}>
+                  {t.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {state.errors?.primaryTopicId && (
+            <p className="text-sm text-destructive">{state.errors.primaryTopicId[0]}</p>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="secondaryTopicId">Secondary Research Topic (optional)</Label>
+        <Select name="secondaryTopicId" defaultValue={defaultValues?.secondaryTopicId || undefined}>
+          <SelectTrigger id="secondaryTopicId" className="w-full">
+            <SelectValue placeholder="None">
+              {(value: string | null) => researchTopics.find((t) => t.id === value)?.name ?? "None"}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {researchTopics.map((t) => (
+              <SelectItem key={t.id} value={t.id}>
+                {t.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">

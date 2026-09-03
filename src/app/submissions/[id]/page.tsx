@@ -15,7 +15,7 @@ export default async function SubmissionDetailPage({
   const { id } = await params;
   const user = await requireUser();
 
-  const [submission, tracks] = await Promise.all([
+  const [submission, tracks, materialSystems, researchTopics] = await Promise.all([
     prisma.submission.findUnique({
       where: { id },
       include: {
@@ -25,6 +25,8 @@ export default async function SubmissionDetailPage({
       },
     }),
     prisma.track.findMany({ orderBy: { name: "asc" } }),
+    prisma.materialSystem.findMany({ orderBy: { name: "asc" } }),
+    prisma.researchTopic.findMany({ orderBy: { name: "asc" } }),
   ]);
 
   if (!submission || submission.submitterId !== user.id) {
@@ -59,10 +61,15 @@ export default async function SubmissionDetailPage({
           <CardContent>
             <SubmissionForm
               tracks={tracks}
+              materialSystems={materialSystems}
+              researchTopics={researchTopics}
               defaultValues={{
                 id: submission.id,
                 title: submission.title,
                 trackId: submission.trackId,
+                materialSystemId: submission.materialSystemId ?? "",
+                primaryTopicId: submission.primaryTopicId ?? "",
+                secondaryTopicId: submission.secondaryTopicId ?? "",
                 presentationType: submission.presentationType,
                 keywords: submission.keywords,
                 authors: submission.authors.map((a) => ({

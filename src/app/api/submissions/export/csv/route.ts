@@ -19,6 +19,9 @@ export async function GET(request: Request) {
     where: status ? { status } : {},
     include: {
       track: true,
+      materialSystem: true,
+      primaryTopic: true,
+      secondaryTopic: true,
       submitter: true,
       authors: { orderBy: { order: "asc" } },
     },
@@ -29,6 +32,9 @@ export async function GET(request: Request) {
     [
       "Title",
       "Track",
+      "Material System",
+      "Primary Research Topic",
+      "Secondary Research Topic",
       "Presentation Type",
       "Presentation Category",
       "Keywords",
@@ -48,6 +54,9 @@ export async function GET(request: Request) {
     rows.push([
       s.title,
       s.track.name,
+      s.materialSystem?.name ?? "",
+      s.primaryTopic?.name ?? "",
+      s.secondaryTopic?.name ?? "",
       PRESENTATION_TYPE_LABELS[s.presentationType],
       PRESENTATION_CATEGORY_LABELS[s.presentationCategory],
       s.keywords.join("; "),

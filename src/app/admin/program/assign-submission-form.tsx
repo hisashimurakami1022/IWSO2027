@@ -13,7 +13,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type SubmissionOption = { id: string; title: string; keywords: string[] };
+type SubmissionOption = {
+  id: string;
+  title: string;
+  keywords: string[];
+  materialSystem: string | null;
+  primaryTopic: string | null;
+  secondaryTopic: string | null;
+};
 
 export function AssignSubmissionForm({
   sessionId,
@@ -32,7 +39,10 @@ export function AssignSubmissionForm({
     return options.filter(
       (o) =>
         o.title.toLowerCase().includes(query) ||
-        o.keywords.some((k) => k.toLowerCase().includes(query))
+        o.keywords.some((k) => k.toLowerCase().includes(query)) ||
+        o.materialSystem?.toLowerCase().includes(query) ||
+        o.primaryTopic?.toLowerCase().includes(query) ||
+        o.secondaryTopic?.toLowerCase().includes(query)
     );
   }, [filter, options]);
 
@@ -60,8 +70,8 @@ export function AssignSubmissionForm({
       <Input
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
-        placeholder="Filter by keyword or title"
-        className="w-56"
+        placeholder="Filter by keyword, title, material, or topic"
+        className="w-72"
       />
       <Select value={selected} onValueChange={(value) => setSelected(value ?? "")}>
         <SelectTrigger className="w-80">
@@ -78,6 +88,7 @@ export function AssignSubmissionForm({
             filteredOptions.map((o) => (
               <SelectItem key={o.id} value={o.id}>
                 {o.title}
+                {o.materialSystem && ` (${o.materialSystem})`}
               </SelectItem>
             ))
           )}

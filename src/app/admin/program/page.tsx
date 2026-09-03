@@ -31,7 +31,12 @@ export default async function AdminProgramPage() {
     prisma.track.findMany({ orderBy: { name: "asc" } }),
     prisma.submission.findMany({
       where: { decision: "ACCEPT" },
-      include: { programSessions: true },
+      include: {
+        programSessions: true,
+        materialSystem: true,
+        primaryTopic: true,
+        secondaryTopic: true,
+      },
       orderBy: { title: "asc" },
     }),
     getConferenceSettings(),
@@ -42,7 +47,14 @@ export default async function AdminProgramPage() {
   );
   const unassignedOptions = acceptedSubmissions
     .filter((s) => !assignedSubmissionIds.has(s.id))
-    .map((s) => ({ id: s.id, title: s.title, keywords: s.keywords }));
+    .map((s) => ({
+      id: s.id,
+      title: s.title,
+      keywords: s.keywords,
+      materialSystem: s.materialSystem?.name ?? null,
+      primaryTopic: s.primaryTopic?.name ?? null,
+      secondaryTopic: s.secondaryTopic?.name ?? null,
+    }));
 
   return (
     <div className="space-y-6">

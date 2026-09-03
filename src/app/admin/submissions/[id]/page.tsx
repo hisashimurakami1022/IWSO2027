@@ -22,6 +22,9 @@ export default async function AdminSubmissionDetailPage({
     where: { id },
     include: {
       track: true,
+      materialSystem: true,
+      primaryTopic: true,
+      secondaryTopic: true,
       submitter: true,
       authors: { orderBy: { order: "asc" } },
       file: true,
@@ -57,6 +60,21 @@ export default async function AdminSubmissionDetailPage({
           <span>{PRESENTATION_TYPE_LABELS[submission.presentationType]}</span>
           <span>&middot;</span>
           <span>{PRESENTATION_CATEGORY_LABELS[submission.presentationCategory]}</span>
+          {submission.materialSystem && (
+            <>
+              <span>&middot;</span>
+              <span>{submission.materialSystem.name}</span>
+            </>
+          )}
+          {submission.primaryTopic && (
+            <>
+              <span>&middot;</span>
+              <span>
+                {submission.primaryTopic.name}
+                {submission.secondaryTopic && ` / ${submission.secondaryTopic.name}`}
+              </span>
+            </>
+          )}
           <span>&middot;</span>
           <span>Submitted by {submission.submitter.email}</span>
           {averageScore && (
