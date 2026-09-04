@@ -9,7 +9,7 @@ export const submissionAuthorSchema = z.object({
 
 export const submissionSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(300),
-  trackId: z.string().min(1, "Select a track"),
+  trackId: z.string().min(1, "Select a presentation category"),
   materialSystemId: z.string().min(1, "Select a material system"),
   primaryTopicId: z.string().min(1, "Select a primary research topic"),
   secondaryTopicId: z.string().optional().or(z.literal("")),

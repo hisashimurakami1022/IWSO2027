@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PRESENTATION_TYPE_LABELS, PRESENTATION_CATEGORY_LABELS } from "@/lib/labels";
+import { PRESENTATION_TYPE_LABELS } from "@/lib/labels";
 
 type Track = { id: string; name: string };
 type MaterialSystem = { id: string; name: string };
@@ -115,11 +115,13 @@ export function SubmissionForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="trackId">Track</Label>
+          <Label htmlFor="trackId">Presentation Category</Label>
           <Select name="trackId" defaultValue={defaultValues?.trackId}>
             <SelectTrigger id="trackId" className="w-full">
-              <SelectValue placeholder="Select a track">
-                {(value: string | null) => tracks.find((t) => t.id === value)?.name ?? "Select a track"}
+              <SelectValue placeholder="Select a presentation category">
+                {(value: string | null) =>
+                  tracks.find((t) => t.id === value)?.name ?? "Select a presentation category"
+                }
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -154,50 +156,15 @@ export function SubmissionForm({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="presentationCategory">Presentation Category</Label>
-        {defaultValues?.submissionCode ? (
-          <>
-            <input
-              type="hidden"
-              name="presentationCategory"
-              value={defaultValues.presentationCategory}
-            />
-            <p className="text-sm">
-              {PRESENTATION_CATEGORY_LABELS[defaultValues.presentationCategory]}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Locked — your submission ID ({defaultValues.submissionCode}) was already assigned
-              based on this. Contact the Chair if it needs to change.
-            </p>
-          </>
-        ) : (
-          <>
-            <Select
-              name="presentationCategory"
-              defaultValue={defaultValues?.presentationCategory ?? "GENERAL"}
-            >
-              <SelectTrigger id="presentationCategory" className="w-full">
-                <SelectValue>
-                  {(value: keyof typeof PRESENTATION_CATEGORY_LABELS) =>
-                    PRESENTATION_CATEGORY_LABELS[value]
-                  }
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(PRESENTATION_CATEGORY_LABELS).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              Only select Invited if the Chair has invited you to give this talk.
-            </p>
-          </>
-        )}
-      </div>
+      {/* Presentation Category (GENERAL/INVITED) is chair-controlled, not
+          author-facing — it duplicated the Track field above. The author's
+          choice always starts as GENERAL; the Chair can mark a talk Invited
+          from the admin submission page. */}
+      <input
+        type="hidden"
+        name="presentationCategory"
+        value={defaultValues?.presentationCategory ?? "GENERAL"}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
