@@ -50,6 +50,9 @@ export default async function NewSubmissionPage() {
               presentationType: "ORAL",
               presentationCategory: "GENERAL",
               keywords: [],
+              studentAwardApplied: false,
+              supervisorName: "",
+              supervisorEmail: "",
               affiliations: user.affiliation ? [user.affiliation] : [],
               authors: [
                 {

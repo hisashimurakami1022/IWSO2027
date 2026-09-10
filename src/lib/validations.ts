@@ -24,6 +24,12 @@ export const submissionSchema = z
       .max(20, "At most 20 affiliations")
       .default([]),
     authors: z.array(submissionAuthorSchema).min(1, "At least one author is required"),
+    // Student Award — all optional. Only persisted for Student Award tracks.
+    studentAwardApplied: z.boolean(),
+    supervisorName: z.string().trim().max(100).optional().or(z.literal("")),
+    supervisorEmail: z
+      .literal("")
+      .or(z.string().trim().email("Enter a valid supervisor email address")),
   })
   .superRefine((val, ctx) => {
     const hasBadAffiliationRef = val.authors.some((a) =>

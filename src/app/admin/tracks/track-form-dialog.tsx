@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +17,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-type Track = { id: string; name: string; code: string; description: string | null };
+type Track = {
+  id: string;
+  name: string;
+  code: string;
+  description: string | null;
+  studentAward: boolean;
+};
 
 const initialState: TrackActionState = {};
 
@@ -76,6 +83,16 @@ export function TrackFormDialog({
               defaultValue={track?.description ?? ""}
             />
           </div>
+          <label className="flex items-start gap-2 text-sm">
+            <Checkbox name="studentAward" defaultChecked={track?.studentAward} className="mt-0.5" />
+            <span>
+              Student Award category
+              <span className="block text-xs text-muted-foreground">
+                Submissions in this track can apply for the Student Award (adds an opt-in
+                checkbox and supervisor fields to the submission form).
+              </span>
+            </span>
+          </label>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel

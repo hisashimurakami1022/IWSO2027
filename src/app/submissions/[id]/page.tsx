@@ -81,6 +81,9 @@ export default async function SubmissionDetailPage({
                 presentationCategory: submission.presentationCategory,
                 submissionCode: submission.submissionCode,
                 keywords: submission.keywords,
+                studentAwardApplied: submission.studentAwardApplied,
+                supervisorName: submission.supervisorName ?? "",
+                supervisorEmail: submission.supervisorEmail ?? "",
                 affiliations: submission.affiliations,
                 authors: submission.authors.map((a) => ({
                   name: a.name,

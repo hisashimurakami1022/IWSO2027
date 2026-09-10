@@ -15,6 +15,7 @@ const trackSchema = z.object({
     .max(20)
     .regex(/^[A-Za-z0-9_-]+$/, "Use letters, numbers, - or _ only"),
   description: z.string().trim().max(500).optional().or(z.literal("")),
+  studentAward: z.boolean(),
 });
 
 export type TrackActionState = {
@@ -34,6 +35,7 @@ export async function saveTrackAction(
     name: formData.get("name"),
     code: formData.get("code"),
     description: formData.get("description"),
+    studentAward: formData.get("studentAward") === "on",
   });
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
@@ -43,6 +45,7 @@ export async function saveTrackAction(
     name: parsed.data.name,
     code: parsed.data.code.toUpperCase(),
     description: parsed.data.description || null,
+    studentAward: parsed.data.studentAward,
   };
 
   try {

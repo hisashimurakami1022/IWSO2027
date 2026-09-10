@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { PRESENTATION_TYPE_LABELS } from "@/lib/labels";
 
-type Track = { id: string; name: string };
+type Track = { id: string; name: string; studentAward: boolean };
 type MaterialSystem = { id: string; name: string };
 type ResearchTopic = { id: string; name: string };
 type SecondaryTopic = { id: string; name: string };
@@ -42,6 +42,9 @@ type SubmissionFormValues = {
   keywords: string[];
   affiliations: string[];
   authors: Author[];
+  studentAwardApplied: boolean;
+  supervisorName: string;
+  supervisorEmail: string;
   existingFileName?: string | null;
 };
 
@@ -98,6 +101,14 @@ export function SubmissionForm({
   const [affiliations, setAffiliations] = useState<AffiliationEntry[]>(initial.affiliations);
   const [authors, setAuthors] = useState<AuthorRow[]>(initial.authors);
   const nextKey = useRef(initial.nextKey);
+  const [trackId, setTrackId] = useState(defaultValues?.trackId ?? "");
+  const [studentAwardApplied, setStudentAwardApplied] = useState(
+    defaultValues?.studentAwardApplied ?? false
+  );
+  const [supervisorName, setSupervisorName] = useState(defaultValues?.supervisorName ?? "");
+  const [supervisorEmail, setSupervisorEmail] = useState(defaultValues?.supervisorEmail ?? "");
+
+  const studentAwardTrack = tracks.find((t) => t.id === trackId)?.studentAward ?? false;
 
   function addKeyword() {
     const value = keywordInput.trim();
@@ -208,7 +219,11 @@ export function SubmissionForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="trackId">Presentation Category</Label>
-          <Select name="trackId" defaultValue={defaultValues?.trackId}>
+          <Select
+            name="trackId"
+            value={trackId}
+            onValueChange={(value) => setTrackId((value as string) ?? "")}
+          >
             <SelectTrigger id="trackId" className="w-full">
               <SelectValue placeholder="Select a presentation category">
                 {(value: string | null) =>
@@ -257,6 +272,59 @@ export function SubmissionForm({
         name="presentationCategory"
         value={defaultValues?.presentationCategory ?? "GENERAL"}
       />
+
+      {/* Student Award. Hidden fields are always submitted; the server
+          only stores them when the chosen track is a Student Award track. */}
+      <input
+        type="hidden"
+        name="studentAwardApplied"
+        value={studentAwardApplied ? "true" : "false"}
+      />
+      <input type="hidden" name="supervisorName" value={supervisorName} />
+      <input type="hidden" name="supervisorEmail" value={supervisorEmail} />
+
+      {studentAwardTrack && (
+        <div className="space-y-3 rounded-md border p-4">
+          <label className="flex items-start gap-2 text-sm">
+            <Checkbox
+              checked={studentAwardApplied}
+              onCheckedChange={(checked) => setStudentAwardApplied(checked === true)}
+              className="mt-0.5"
+            />
+            <span>
+              Apply for the Student Award
+              <span className="block text-xs text-muted-foreground">
+                Open to both oral and poster student presentations. Optional — leave this
+                unchecked if not applying.
+              </span>
+            </span>
+          </label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="supervisorName">Supervisor name</Label>
+              <Input
+                id="supervisorName"
+                value={supervisorName}
+                onChange={(e) => setSupervisorName(e.target.value)}
+                maxLength={100}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="supervisorEmail">Supervisor email</Label>
+              <Input
+                id="supervisorEmail"
+                type="email"
+                value={supervisorEmail}
+                onChange={(e) => setSupervisorEmail(e.target.value)}
+                maxLength={200}
+              />
+            </div>
+          </div>
+          {state.errors?.supervisorEmail && (
+            <p className="text-sm text-destructive">{state.errors.supervisorEmail[0]}</p>
+          )}
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">

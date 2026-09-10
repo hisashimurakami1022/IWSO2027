@@ -47,6 +47,9 @@ function parseFormData(formData: FormData) {
     keywords,
     affiliations,
     authors,
+    studentAwardApplied: formData.get("studentAwardApplied") === "true",
+    supervisorName: (formData.get("supervisorName") as string) ?? "",
+    supervisorEmail: (formData.get("supervisorEmail") as string) ?? "",
   };
 }
 
@@ -118,6 +121,17 @@ export async function saveSubmissionAction(
       ? await allocateSubmissionCode(data.presentationCategory)
       : undefined;
 
+  // Student Award fields only apply to a Student Award track; otherwise
+  // clear them so switching away from that track doesn't leave stale data.
+  const track = await prisma.track.findUnique({ where: { id: data.trackId } });
+  const studentAward = track?.studentAward
+    ? {
+        studentAwardApplied: data.studentAwardApplied,
+        supervisorName: data.supervisorName || null,
+        supervisorEmail: data.supervisorEmail || null,
+      }
+    : { studentAwardApplied: false, supervisorName: null, supervisorEmail: null };
+
   const submission = existing
     ? await prisma.submission.update({
         where: { id: existing.id },
@@ -131,6 +145,7 @@ export async function saveSubmissionAction(
           presentationCategory: data.presentationCategory,
           keywords: data.keywords,
           affiliations: data.affiliations,
+          ...studentAward,
           status,
           ...(submissionCode ? { submissionCode } : {}),
           submittedAt:
@@ -152,6 +167,7 @@ export async function saveSubmissionAction(
           presentationCategory: data.presentationCategory,
           keywords: data.keywords,
           affiliations: data.affiliations,
+          ...studentAward,
           status,
           ...(submissionCode ? { submissionCode } : {}),
           submitterId: user.id,

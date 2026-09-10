@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ReorderButtons } from "@/components/reorder-buttons";
@@ -51,7 +52,14 @@ export default async function TracksPage() {
                     />
                   </TableCell>
                   <TableCell className="font-mono text-xs">{t.code}</TableCell>
-                  <TableCell>{t.name}</TableCell>
+                  <TableCell>
+                    {t.name}
+                    {t.studentAward && (
+                      <Badge variant="outline" className="ml-2">
+                        Student Award
+                      </Badge>
+                    )}
+                  </TableCell>
                   <TableCell className="max-w-xs truncate text-muted-foreground">
                     {t.description}
                   </TableCell>

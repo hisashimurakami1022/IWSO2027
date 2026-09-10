@@ -133,6 +133,9 @@ model Track {
   code        String   @unique
   description String?
   order       Int      @default(0)
+  // When true, submissions in this track see the Student Award section
+  // (opt-in checkbox + supervisor contact) on the submission form.
+  studentAward Boolean @default(false)
   createdAt   DateTime @default(now())
 
   submissions       Submission[]
@@ -177,6 +180,11 @@ model Submission {
   presentationCategory PresentationCategory @default(GENERAL)
   status               SubmissionStatus     @default(DRAFT)
   decision             Decision?
+  // Student Award — only meaningful when the chosen track has
+  // studentAward set. All optional; a blank supervisor means "no entry".
+  studentAwardApplied  Boolean              @default(false)
+  supervisorName       String?
+  supervisorEmail      String?
   trackId              String
   materialSystemId     String?
   primaryTopicId       String?

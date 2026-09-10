@@ -52,6 +52,9 @@ export async function GET(request: Request) {
       "Affiliations",
       "Author Affiliations",
       "Presenter",
+      "Student Award",
+      "Supervisor Name",
+      "Supervisor Email",
       "Submitted At",
     ],
   ];
@@ -84,6 +87,9 @@ export async function GET(request: Request) {
         .map((a) => resolveAuthorAffiliations(a.affiliationIndexes, s.affiliations).join(" / "))
         .join("; "),
       presenters.map((a) => a.name).join("; "),
+      s.track.studentAward && s.studentAwardApplied ? "Applied" : "",
+      s.supervisorName ?? "",
+      s.supervisorEmail ?? "",
       s.submittedAt ? format(s.submittedAt, "yyyy-MM-dd HH:mm") : "",
     ]);
   }

@@ -130,6 +130,36 @@ export default async function AdminSubmissionDetailPage({
         </Card>
       )}
 
+      {submission.track.studentAward && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Student Award</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1 text-sm">
+            <p>
+              <span className="text-muted-foreground">Application: </span>
+              {submission.studentAwardApplied ? (
+                <Badge>Applied</Badge>
+              ) : (
+                <span className="text-muted-foreground">not applied</span>
+              )}
+            </p>
+            <p>
+              <span className="text-muted-foreground">Supervisor: </span>
+              {submission.supervisorName || submission.supervisorEmail ? (
+                <>
+                  {submission.supervisorName}
+                  {submission.supervisorName && submission.supervisorEmail && " · "}
+                  {submission.supervisorEmail}
+                </>
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              )}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Authors</CardTitle>
