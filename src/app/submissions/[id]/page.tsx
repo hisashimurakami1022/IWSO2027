@@ -86,7 +86,7 @@ export default async function SubmissionDetailPage({
                   name: a.name,
                   email: a.email,
                   affiliationIndexes: a.affiliationIndexes,
-                  isCorresponding: a.isCorresponding,
+                  isPresenter: a.isPresenter,
                 })),
                 existingFileName: submission.file?.fileName ?? null,
               }}

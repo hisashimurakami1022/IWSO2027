@@ -45,7 +45,7 @@ async function main() {
             name: "Author One",
             email: "author1@example.com",
             affiliationIndexes: [1],
-            isCorresponding: true,
+            isPresenter: true,
             order: 0,
           },
         ],

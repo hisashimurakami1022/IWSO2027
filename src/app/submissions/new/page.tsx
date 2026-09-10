@@ -56,7 +56,7 @@ export default async function NewSubmissionPage() {
                   name: user.name ?? "",
                   email: user.email,
                   affiliationIndexes: user.affiliation ? [1] : [],
-                  isCorresponding: true,
+                  isPresenter: true,
                 },
               ],
             }}

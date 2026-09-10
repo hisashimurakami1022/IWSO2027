@@ -26,7 +26,7 @@ type Author = {
   name: string;
   email: string;
   affiliationIndexes: number[];
-  isCorresponding: boolean;
+  isPresenter: boolean;
 };
 
 type SubmissionFormValues = {
@@ -53,7 +53,7 @@ type AuthorRow = {
   name: string;
   email: string;
   affiliationKeys: string[];
-  isCorresponding: boolean;
+  isPresenter: boolean;
 };
 
 function buildInitialState(defaultValues?: SubmissionFormValues) {
@@ -64,11 +64,11 @@ function buildInitialState(defaultValues?: SubmissionFormValues) {
   const source =
     defaultValues?.authors && defaultValues.authors.length > 0
       ? defaultValues.authors
-      : [{ name: "", email: "", affiliationIndexes: [], isCorresponding: true }];
+      : [{ name: "", email: "", affiliationIndexes: [], isPresenter: true }];
   const authors: AuthorRow[] = source.map((a) => ({
     name: a.name,
     email: a.email,
-    isCorresponding: a.isCorresponding,
+    isPresenter: a.isPresenter,
     affiliationKeys: a.affiliationIndexes
       .filter((n) => n >= 1 && n <= affiliations.length)
       .map((n) => affiliations[n - 1].key),
@@ -156,7 +156,7 @@ export function SubmissionForm({
   function addAuthor() {
     setAuthors((prev) => [
       ...prev,
-      { name: "", email: "", affiliationKeys: [], isCorresponding: false },
+      { name: "", email: "", affiliationKeys: [], isPresenter: false },
     ]);
   }
 
@@ -177,7 +177,7 @@ export function SubmissionForm({
   const authorsPayload = authors.map((a) => ({
     name: a.name,
     email: a.email,
-    isCorresponding: a.isCorresponding,
+    isPresenter: a.isPresenter,
     affiliationIndexes: a.affiliationKeys
       .map((k) => keyToNumber.get(k))
       .filter((n): n is number => typeof n === "number")
@@ -460,11 +460,11 @@ export function SubmissionForm({
                   required
                 />
                 <Input
-                  placeholder="Email"
+                  placeholder={author.isPresenter ? "Email" : "Email (optional)"}
                   type="email"
                   value={author.email}
                   onChange={(e) => updateAuthor(index, { email: e.target.value })}
-                  required
+                  required={author.isPresenter}
                 />
                 <Button
                   type="button"
@@ -501,12 +501,12 @@ export function SubmissionForm({
                 )}
                 <label className="ml-auto flex items-center gap-2 whitespace-nowrap text-sm">
                   <Checkbox
-                    checked={author.isCorresponding}
+                    checked={author.isPresenter}
                     onCheckedChange={(checked) =>
-                      updateAuthor(index, { isCorresponding: checked === true })
+                      updateAuthor(index, { isPresenter: checked === true })
                     }
                   />
-                  Corresponding
+                  Presenter
                 </label>
               </div>
             </div>

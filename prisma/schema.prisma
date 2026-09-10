@@ -253,7 +253,9 @@ model SubmissionAuthor {
   // 1-based indexes into Submission.affiliations.
   affiliationIndexes Int[]   @default([])
   order              Int     @default(0)
-  isCorresponding    Boolean @default(false)
+  // The author who will give the talk / stand at the poster. Their email
+  // is required; co-authors' emails are optional.
+  isPresenter        Boolean @default(false)
 
   submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 }

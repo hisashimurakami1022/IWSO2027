@@ -144,7 +144,7 @@ export default async function AdminSubmissionDetailPage({
                 )}
               </span>
               <span className="text-muted-foreground">{a.email}</span>
-              {a.isCorresponding && <Badge variant="outline">Corresponding</Badge>}
+              {a.isPresenter && <Badge variant="outline">Presenter</Badge>}
             </div>
           ))}
           {submission.affiliations.length > 0 && (

@@ -51,13 +51,13 @@ export async function GET(request: Request) {
       "Author Emails",
       "Affiliations",
       "Author Affiliations",
-      "Corresponding Author",
+      "Presenter",
       "Submitted At",
     ],
   ];
 
   for (const s of submissions) {
-    const correspondingAuthor = s.authors.find((a) => a.isCorresponding);
+    const presenters = s.authors.filter((a) => a.isPresenter);
     const ratedReviews = s.reviews
       .map((r) => (r.rating ? REVIEW_RATING_VALUES[r.rating] : undefined))
       .filter((v): v is number => typeof v === "number");
@@ -83,7 +83,7 @@ export async function GET(request: Request) {
       s.authors
         .map((a) => resolveAuthorAffiliations(a.affiliationIndexes, s.affiliations).join(" / "))
         .join("; "),
-      correspondingAuthor?.name ?? "",
+      presenters.map((a) => a.name).join("; "),
       s.submittedAt ? format(s.submittedAt, "yyyy-MM-dd HH:mm") : "",
     ]);
   }

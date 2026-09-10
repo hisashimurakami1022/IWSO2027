@@ -106,7 +106,7 @@ export async function saveSubmissionAction(
     name: a.name,
     email: a.email,
     affiliationIndexes: a.affiliationIndexes.filter((n) => n <= data.affiliations.length),
-    isCorresponding: a.isCorresponding,
+    isPresenter: a.isPresenter,
     order: i,
   }));
 

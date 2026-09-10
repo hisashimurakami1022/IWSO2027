@@ -2,9 +2,11 @@ import { z } from "zod";
 
 export const submissionAuthorSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
-  email: z.string().trim().email("Enter a valid email address"),
+  // Optional for co-authors; the presenter's email is required (checked
+  // in submissionSchema's superRefine). If given, it must be well-formed.
+  email: z.literal("").or(z.string().trim().email("Enter a valid email address")),
   affiliationIndexes: z.array(z.number().int().positive()).default([]),
-  isCorresponding: z.boolean(),
+  isPresenter: z.boolean(),
 });
 
 export const submissionSchema = z
@@ -24,17 +26,31 @@ export const submissionSchema = z
     authors: z.array(submissionAuthorSchema).min(1, "At least one author is required"),
   })
   .superRefine((val, ctx) => {
-    for (const author of val.authors) {
-      for (const idx of author.affiliationIndexes) {
-        if (idx > val.affiliations.length) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ["authors"],
-            message: "An author references an affiliation number that no longer exists.",
-          });
-          return;
-        }
-      }
+    const hasBadAffiliationRef = val.authors.some((a) =>
+      a.affiliationIndexes.some((idx) => idx > val.affiliations.length)
+    );
+    if (hasBadAffiliationRef) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["authors"],
+        message: "An author references an affiliation number that no longer exists.",
+      });
+    }
+
+    const presenters = val.authors.filter((a) => a.isPresenter);
+    if (presenters.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["authors"],
+        message: "Tick “Presenter” for the author who will present.",
+      });
+    }
+    if (presenters.some((a) => a.email.trim() === "")) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["authors"],
+        message: "The presenter's email address is required.",
+      });
     }
   });
 
