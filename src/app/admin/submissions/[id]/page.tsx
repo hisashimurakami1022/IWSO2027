@@ -137,12 +137,25 @@ export default async function AdminSubmissionDetailPage({
         <CardContent className="space-y-2 text-sm">
           {submission.authors.map((a) => (
             <div key={a.id} className="flex flex-wrap items-center gap-2">
-              <span className="font-medium">{a.name}</span>
+              <span className="font-medium">
+                {a.name}
+                {a.affiliationIndexes.length > 0 && (
+                  <sup className="ml-0.5">{a.affiliationIndexes.join(",")}</sup>
+                )}
+              </span>
               <span className="text-muted-foreground">{a.email}</span>
-              {a.affiliation && <span className="text-muted-foreground">({a.affiliation})</span>}
               {a.isCorresponding && <Badge variant="outline">Corresponding</Badge>}
             </div>
           ))}
+          {submission.affiliations.length > 0 && (
+            <div className="space-y-0.5 pt-1 text-muted-foreground">
+              {submission.affiliations.map((name, i) => (
+                <div key={i}>
+                  <sup>{i + 1}</sup> {name}
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 

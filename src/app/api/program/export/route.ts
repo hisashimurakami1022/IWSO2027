@@ -5,6 +5,7 @@ import { PROGRAM_SESSION_TYPE_LABELS } from "@/lib/labels";
 import { getConferenceSettings } from "@/lib/settings";
 import { computeTalkSlots, type TalkSlot } from "@/lib/program-schedule";
 import { toCsv } from "@/lib/csv";
+import { formatAffiliationList, resolveAuthorAffiliations } from "@/lib/authors";
 
 function formatTalkTime(slot: TalkSlot | undefined) {
   if (!slot) return "";
@@ -89,8 +90,14 @@ export async function GET() {
         ps.submission.primaryTopic?.name ?? "",
         ps.submission.secondaryTopic?.name ?? "",
         formatTalkTime(slots?.get(ps.submissionId)),
-        ps.submission.authors.map((a) => a.name).join("; "),
-        ps.submission.authors.map((a) => a.affiliation ?? "").join("; "),
+        ps.submission.authors
+          .map((a) =>
+            resolveAuthorAffiliations(a.affiliationIndexes, ps.submission.affiliations).length > 0
+              ? `${a.name} (${a.affiliationIndexes.join(",")})`
+              : a.name
+          )
+          .join("; "),
+        formatAffiliationList(ps.submission.affiliations),
       ]);
     }
   }

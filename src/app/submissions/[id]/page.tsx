@@ -81,10 +81,11 @@ export default async function SubmissionDetailPage({
                 presentationCategory: submission.presentationCategory,
                 submissionCode: submission.submissionCode,
                 keywords: submission.keywords,
+                affiliations: submission.affiliations,
                 authors: submission.authors.map((a) => ({
                   name: a.name,
                   email: a.email,
-                  affiliation: a.affiliation ?? "",
+                  affiliationIndexes: a.affiliationIndexes,
                   isCorresponding: a.isCorresponding,
                 })),
                 existingFileName: submission.file?.fileName ?? null,

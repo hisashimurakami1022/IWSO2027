@@ -9,6 +9,7 @@ import {
   REVIEW_RATING_VALUES,
 } from "@/lib/labels";
 import { toCsv } from "@/lib/csv";
+import { formatAffiliationList, resolveAuthorAffiliations } from "@/lib/authors";
 import type { SubmissionStatus } from "@/generated/prisma/client";
 
 export async function GET(request: Request) {
@@ -48,6 +49,7 @@ export async function GET(request: Request) {
       "Submitter Email",
       "Author Names",
       "Author Emails",
+      "Affiliations",
       "Author Affiliations",
       "Corresponding Author",
       "Submitted At",
@@ -77,7 +79,10 @@ export async function GET(request: Request) {
       s.submitter.email,
       s.authors.map((a) => a.name).join("; "),
       s.authors.map((a) => a.email).join("; "),
-      s.authors.map((a) => a.affiliation ?? "").join("; "),
+      formatAffiliationList(s.affiliations),
+      s.authors
+        .map((a) => resolveAuthorAffiliations(a.affiliationIndexes, s.affiliations).join(" / "))
+        .join("; "),
       correspondingAuthor?.name ?? "",
       s.submittedAt ? format(s.submittedAt, "yyyy-MM-dd HH:mm") : "",
     ]);

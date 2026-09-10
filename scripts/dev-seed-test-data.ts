@@ -38,12 +38,13 @@ async function main() {
       submittedAt: new Date(),
       trackId: track.id,
       submitterId: author.id,
+      affiliations: ["Test University"],
       authors: {
         create: [
           {
             name: "Author One",
             email: "author1@example.com",
-            affiliation: "Test University",
+            affiliationIndexes: [1],
             isCorresponding: true,
             order: 0,
           },

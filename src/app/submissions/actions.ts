@@ -19,6 +19,7 @@ export type SubmissionActionState = {
 function parseFormData(formData: FormData) {
   let keywords: unknown = [];
   let authors: unknown = [];
+  let affiliations: unknown = [];
   try {
     keywords = JSON.parse((formData.get("keywordsJson") as string) || "[]");
   } catch {
@@ -28,6 +29,11 @@ function parseFormData(formData: FormData) {
     authors = JSON.parse((formData.get("authorsJson") as string) || "[]");
   } catch {
     authors = [];
+  }
+  try {
+    affiliations = JSON.parse((formData.get("affiliationsJson") as string) || "[]");
+  } catch {
+    affiliations = [];
   }
 
   return {
@@ -39,6 +45,7 @@ function parseFormData(formData: FormData) {
     presentationType: formData.get("presentationType"),
     presentationCategory: formData.get("presentationCategory"),
     keywords,
+    affiliations,
     authors,
   };
 }
@@ -93,10 +100,12 @@ export async function saveSubmissionAction(
     return { errors: { abstractFile: ["Please upload the abstract PDF before submitting."] } };
   }
 
+  // Drop any author references to affiliations past the end of the list
+  // (defence in depth — the schema's superRefine already rejects these).
   const authorsData = data.authors.map((a, i) => ({
     name: a.name,
     email: a.email,
-    affiliation: a.affiliation || null,
+    affiliationIndexes: a.affiliationIndexes.filter((n) => n <= data.affiliations.length),
     isCorresponding: a.isCorresponding,
     order: i,
   }));
@@ -121,6 +130,7 @@ export async function saveSubmissionAction(
           presentationType: data.presentationType,
           presentationCategory: data.presentationCategory,
           keywords: data.keywords,
+          affiliations: data.affiliations,
           status,
           ...(submissionCode ? { submissionCode } : {}),
           submittedAt:
@@ -141,6 +151,7 @@ export async function saveSubmissionAction(
           presentationType: data.presentationType,
           presentationCategory: data.presentationCategory,
           keywords: data.keywords,
+          affiliations: data.affiliations,
           status,
           ...(submissionCode ? { submissionCode } : {}),
           submitterId: user.id,

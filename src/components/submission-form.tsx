@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { saveSubmissionAction, type SubmissionActionState } from "@/app/submissions/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,10 +21,11 @@ type MaterialSystem = { id: string; name: string };
 type ResearchTopic = { id: string; name: string };
 type SecondaryTopic = { id: string; name: string };
 
+// `affiliationIndexes` are 1-based positions into `affiliations`.
 type Author = {
   name: string;
   email: string;
-  affiliation: string;
+  affiliationIndexes: number[];
   isCorresponding: boolean;
 };
 
@@ -39,11 +40,41 @@ type SubmissionFormValues = {
   presentationCategory: "GENERAL" | "INVITED";
   submissionCode?: string | null;
   keywords: string[];
+  affiliations: string[];
   authors: Author[];
   existingFileName?: string | null;
 };
 
-const emptyAuthor: Author = { name: "", email: "", affiliation: "", isCorresponding: false };
+// Affiliations are held with a stable local key so rows can be reordered or
+// removed without disturbing which author points at which institution; the
+// key -> 1-based-position mapping is resolved only at submit time.
+type AffiliationEntry = { key: string; name: string };
+type AuthorRow = {
+  name: string;
+  email: string;
+  affiliationKeys: string[];
+  isCorresponding: boolean;
+};
+
+function buildInitialState(defaultValues?: SubmissionFormValues) {
+  const affiliations: AffiliationEntry[] = (defaultValues?.affiliations ?? []).map((name, i) => ({
+    key: `aff-${i}`,
+    name,
+  }));
+  const source =
+    defaultValues?.authors && defaultValues.authors.length > 0
+      ? defaultValues.authors
+      : [{ name: "", email: "", affiliationIndexes: [], isCorresponding: true }];
+  const authors: AuthorRow[] = source.map((a) => ({
+    name: a.name,
+    email: a.email,
+    isCorresponding: a.isCorresponding,
+    affiliationKeys: a.affiliationIndexes
+      .filter((n) => n >= 1 && n <= affiliations.length)
+      .map((n) => affiliations[n - 1].key),
+  }));
+  return { affiliations, authors, nextKey: affiliations.length };
+}
 
 const initialState: SubmissionActionState = {};
 
@@ -63,11 +94,10 @@ export function SubmissionForm({
   const [state, formAction, isPending] = useActionState(saveSubmissionAction, initialState);
   const [keywords, setKeywords] = useState<string[]>(defaultValues?.keywords ?? []);
   const [keywordInput, setKeywordInput] = useState("");
-  const [authors, setAuthors] = useState<Author[]>(
-    defaultValues?.authors && defaultValues.authors.length > 0
-      ? defaultValues.authors
-      : [{ ...emptyAuthor, isCorresponding: true }]
-  );
+  const [initial] = useState(() => buildInitialState(defaultValues));
+  const [affiliations, setAffiliations] = useState<AffiliationEntry[]>(initial.affiliations);
+  const [authors, setAuthors] = useState<AuthorRow[]>(initial.authors);
+  const nextKey = useRef(initial.nextKey);
 
   function addKeyword() {
     const value = keywordInput.trim();
@@ -81,23 +111,85 @@ export function SubmissionForm({
     setKeywords(keywords.filter((k) => k !== kw));
   }
 
-  function updateAuthor(index: number, patch: Partial<Author>) {
-    setAuthors(authors.map((a, i) => (i === index ? { ...a, ...patch } : a)));
+  function addAffiliation() {
+    setAffiliations((prev) => [...prev, { key: `aff-${nextKey.current++}`, name: "" }]);
+  }
+
+  function updateAffiliation(key: string, name: string) {
+    setAffiliations((prev) => prev.map((a) => (a.key === key ? { ...a, name } : a)));
+  }
+
+  function removeAffiliation(key: string) {
+    setAffiliations((prev) => prev.filter((a) => a.key !== key));
+    setAuthors((prev) =>
+      prev.map((a) => ({ ...a, affiliationKeys: a.affiliationKeys.filter((k) => k !== key) }))
+    );
+  }
+
+  function moveAffiliation(index: number, dir: -1 | 1) {
+    setAffiliations((prev) => {
+      const j = index + dir;
+      if (j < 0 || j >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[j]] = [next[j], next[index]];
+      return next;
+    });
+  }
+
+  function updateAuthor(index: number, patch: Partial<AuthorRow>) {
+    setAuthors((prev) => prev.map((a, i) => (i === index ? { ...a, ...patch } : a)));
+  }
+
+  function toggleAuthorAffiliation(index: number, key: string, on: boolean) {
+    setAuthors((prev) =>
+      prev.map((a, i) => {
+        if (i !== index) return a;
+        const keep = new Set(a.affiliationKeys);
+        if (on) keep.add(key);
+        else keep.delete(key);
+        // Store keys in affiliation-list order so byline markers read 1,2,3.
+        return { ...a, affiliationKeys: affiliations.filter((e) => keep.has(e.key)).map((e) => e.key) };
+      })
+    );
   }
 
   function addAuthor() {
-    setAuthors([...authors, { ...emptyAuthor }]);
+    setAuthors((prev) => [
+      ...prev,
+      { name: "", email: "", affiliationKeys: [], isCorresponding: false },
+    ]);
   }
 
   function removeAuthor(index: number) {
-    setAuthors(authors.filter((_, i) => i !== index));
+    setAuthors((prev) => prev.filter((_, i) => i !== index));
   }
+
+  // Derived submit payload: drop blank affiliation rows, renumber the rest
+  // 1..N, and translate each author's keys into those numbers.
+  const keyToNumber = new Map<string, number>();
+  const cleanAffiliations: string[] = [];
+  for (const entry of affiliations) {
+    const name = entry.name.trim();
+    if (!name) continue;
+    cleanAffiliations.push(name);
+    keyToNumber.set(entry.key, cleanAffiliations.length);
+  }
+  const authorsPayload = authors.map((a) => ({
+    name: a.name,
+    email: a.email,
+    isCorresponding: a.isCorresponding,
+    affiliationIndexes: a.affiliationKeys
+      .map((k) => keyToNumber.get(k))
+      .filter((n): n is number => typeof n === "number")
+      .sort((x, y) => x - y),
+  }));
 
   return (
     <form action={formAction} className="space-y-6">
       {defaultValues?.id && <input type="hidden" name="id" value={defaultValues.id} />}
       <input type="hidden" name="keywordsJson" value={JSON.stringify(keywords)} />
-      <input type="hidden" name="authorsJson" value={JSON.stringify(authors)} />
+      <input type="hidden" name="affiliationsJson" value={JSON.stringify(cleanAffiliations)} />
+      <input type="hidden" name="authorsJson" value={JSON.stringify(authorsPayload)} />
 
       {state.message && (
         <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -287,6 +379,68 @@ export function SubmissionForm({
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
+          <Label>Affiliations</Label>
+          <Button type="button" variant="outline" size="sm" onClick={addAffiliation}>
+            + Add Affiliation
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          List each institution once. Then tick the numbers that apply to each author below.
+        </p>
+        {affiliations.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No affiliations added yet.</p>
+        ) : (
+          <div className="space-y-2">
+            {affiliations.map((entry, index) => (
+              <div key={entry.key} className="flex items-center gap-2">
+                <span className="w-6 shrink-0 text-right text-sm tabular-nums text-muted-foreground">
+                  {index + 1}.
+                </span>
+                <Input
+                  placeholder="Institution, City, Country"
+                  value={entry.name}
+                  maxLength={200}
+                  onChange={(e) => updateAffiliation(entry.key, e.target.value)}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={index === 0}
+                  onClick={() => moveAffiliation(index, -1)}
+                  aria-label="Move up"
+                >
+                  ↑
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={index === affiliations.length - 1}
+                  onClick={() => moveAffiliation(index, 1)}
+                  aria-label="Move down"
+                >
+                  ↓
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeAffiliation(entry.key)}
+                >
+                  Remove
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+        {state.errors?.affiliations && (
+          <p className="text-sm text-destructive">{state.errors.affiliations[0]}</p>
+        )}
+      </div>
+
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
           <Label>Authors</Label>
           <Button type="button" variant="outline" size="sm" onClick={addAuthor}>
             + Add Author
@@ -297,43 +451,64 @@ export function SubmissionForm({
         )}
         <div className="space-y-3">
           {authors.map((author, index) => (
-            <div key={index} className="grid gap-2 rounded-md border p-3 sm:grid-cols-[1fr_1fr_1fr_auto_auto]">
-              <Input
-                placeholder="Name"
-                value={author.name}
-                onChange={(e) => updateAuthor(index, { name: e.target.value })}
-                required
-              />
-              <Input
-                placeholder="Email"
-                type="email"
-                value={author.email}
-                onChange={(e) => updateAuthor(index, { email: e.target.value })}
-                required
-              />
-              <Input
-                placeholder="Affiliation"
-                value={author.affiliation}
-                onChange={(e) => updateAuthor(index, { affiliation: e.target.value })}
-              />
-              <label className="flex items-center gap-2 whitespace-nowrap px-2 text-sm">
-                <Checkbox
-                  checked={author.isCorresponding}
-                  onCheckedChange={(checked) =>
-                    updateAuthor(index, { isCorresponding: checked === true })
-                  }
+            <div key={index} className="space-y-2 rounded-md border p-3">
+              <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                <Input
+                  placeholder="Name"
+                  value={author.name}
+                  onChange={(e) => updateAuthor(index, { name: e.target.value })}
+                  required
                 />
-                Corresponding
-              </label>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                disabled={authors.length <= 1}
-                onClick={() => removeAuthor(index)}
-              >
-                Remove
-              </Button>
+                <Input
+                  placeholder="Email"
+                  type="email"
+                  value={author.email}
+                  onChange={(e) => updateAuthor(index, { email: e.target.value })}
+                  required
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={authors.length <= 1}
+                  onClick={() => removeAuthor(index)}
+                >
+                  Remove
+                </Button>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <span className="text-sm text-muted-foreground">Affiliations:</span>
+                {affiliations.length === 0 ? (
+                  <span className="text-sm text-muted-foreground">
+                    Add an affiliation above first.
+                  </span>
+                ) : (
+                  affiliations.map((entry, ai) => (
+                    <label
+                      key={entry.key}
+                      className="flex items-center gap-1.5 text-sm"
+                      title={entry.name || `Affiliation ${ai + 1}`}
+                    >
+                      <Checkbox
+                        checked={author.affiliationKeys.includes(entry.key)}
+                        onCheckedChange={(checked) =>
+                          toggleAuthorAffiliation(index, entry.key, checked === true)
+                        }
+                      />
+                      <span className="tabular-nums">{ai + 1}</span>
+                    </label>
+                  ))
+                )}
+                <label className="ml-auto flex items-center gap-2 whitespace-nowrap text-sm">
+                  <Checkbox
+                    checked={author.isCorresponding}
+                    onCheckedChange={(checked) =>
+                      updateAuthor(index, { isCorresponding: checked === true })
+                    }
+                  />
+                  Corresponding
+                </label>
+              </div>
             </div>
           ))}
         </div>

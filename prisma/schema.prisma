@@ -170,6 +170,9 @@ model Submission {
   submissionCode       String?              @unique
   title                String
   keywords             String[]             @default([])
+  // Institutions, in display order. Authors reference these by 1-based
+  // position via SubmissionAuthor.affiliationIndexes.
+  affiliations         String[]             @default([])
   presentationType     PresentationType     @default(ORAL)
   presentationCategory PresentationCategory @default(GENERAL)
   status               SubmissionStatus     @default(DRAFT)
@@ -243,13 +246,14 @@ model SecondaryTopic {
 }
 
 model SubmissionAuthor {
-  id              String  @id @default(cuid())
-  submissionId    String
-  name            String
-  email           String
-  affiliation     String?
-  order           Int     @default(0)
-  isCorresponding Boolean @default(false)
+  id                 String  @id @default(cuid())
+  submissionId       String
+  name               String
+  email              String
+  // 1-based indexes into Submission.affiliations.
+  affiliationIndexes Int[]   @default([])
+  order              Int     @default(0)
+  isCorresponding    Boolean @default(false)
 
   submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 }
