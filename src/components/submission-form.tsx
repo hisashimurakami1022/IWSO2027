@@ -60,7 +60,10 @@ type AuthorRow = {
 };
 
 function buildInitialState(defaultValues?: SubmissionFormValues) {
-  const affiliations: AffiliationEntry[] = (defaultValues?.affiliations ?? []).map((name, i) => ({
+  // Always start with at least one affiliation row visible (like Authors),
+  // so submitters don't miss the field. Blank rows are dropped on submit.
+  const names = defaultValues?.affiliations?.length ? defaultValues.affiliations : [""];
+  const affiliations: AffiliationEntry[] = names.map((name, i) => ({
     key: `aff-${i}`,
     name,
   }));
@@ -456,13 +459,15 @@ export function SubmissionForm({
           List each institution once. Then tick the numbers that apply to each author below.
         </p>
         {affiliations.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No affiliations added yet.</p>
+          <p className="text-sm text-muted-foreground">
+            No affiliations yet — add one so authors can be linked to it.
+          </p>
         ) : (
           <div className="space-y-2">
             {affiliations.map((entry, index) => (
               <div key={entry.key} className="flex items-center gap-2">
                 <span className="w-6 shrink-0 text-right text-sm tabular-nums text-muted-foreground">
-                  {index + 1}.
+                  {keyToNumber.has(entry.key) ? `${keyToNumber.get(entry.key)}.` : "–"}
                 </span>
                 <Input
                   placeholder="Institution, City, Country"
@@ -494,6 +499,7 @@ export function SubmissionForm({
                   type="button"
                   variant="ghost"
                   size="sm"
+                  disabled={affiliations.length <= 1}
                   onClick={() => removeAffiliation(entry.key)}
                 >
                   Remove
@@ -546,26 +552,28 @@ export function SubmissionForm({
               </div>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <span className="text-sm text-muted-foreground">Affiliations:</span>
-                {affiliations.length === 0 ? (
+                {keyToNumber.size === 0 ? (
                   <span className="text-sm text-muted-foreground">
-                    Add an affiliation above first.
+                    Fill in an affiliation above first.
                   </span>
                 ) : (
-                  affiliations.map((entry, ai) => (
-                    <label
-                      key={entry.key}
-                      className="flex items-center gap-1.5 text-sm"
-                      title={entry.name || `Affiliation ${ai + 1}`}
-                    >
-                      <Checkbox
-                        checked={author.affiliationKeys.includes(entry.key)}
-                        onCheckedChange={(checked) =>
-                          toggleAuthorAffiliation(index, entry.key, checked === true)
-                        }
-                      />
-                      <span className="tabular-nums">{ai + 1}</span>
-                    </label>
-                  ))
+                  affiliations
+                    .filter((entry) => keyToNumber.has(entry.key))
+                    .map((entry) => (
+                      <label
+                        key={entry.key}
+                        className="flex items-center gap-1.5 text-sm"
+                        title={entry.name}
+                      >
+                        <Checkbox
+                          checked={author.affiliationKeys.includes(entry.key)}
+                          onCheckedChange={(checked) =>
+                            toggleAuthorAffiliation(index, entry.key, checked === true)
+                          }
+                        />
+                        <span className="tabular-nums">{keyToNumber.get(entry.key)}</span>
+                      </label>
+                    ))
                 )}
                 <label className="ml-auto flex items-center gap-2 whitespace-nowrap text-sm">
                   <Checkbox
