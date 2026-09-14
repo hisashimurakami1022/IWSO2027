@@ -2,14 +2,8 @@ import { Readable } from "node:stream";
 import { ZipArchive } from "archiver";
 import { prisma } from "@/lib/prisma";
 import { requireChair } from "@/lib/session";
+import { abstractFileName } from "@/lib/abstract-filename";
 import type { SubmissionStatus } from "@/generated/prisma/client";
-
-function safeFilenamePart(value: string, maxLength: number) {
-  return value
-    .replace(/[\\/:*?"<>|]/g, "_")
-    .trim()
-    .slice(0, maxLength);
-}
 
 export async function GET(request: Request) {
   await requireChair();
@@ -20,7 +14,7 @@ export async function GET(request: Request) {
   // below, so we never hold more than one file in memory at once.
   const submissions = await prisma.submission.findMany({
     where: { ...(status ? { status } : {}), file: { isNot: null } },
-    select: { id: true, title: true },
+    select: { id: true, title: true, submissionCode: true },
     orderBy: { createdAt: "asc" },
   });
 
@@ -35,7 +29,7 @@ export async function GET(request: Request) {
       });
       if (!file) continue;
 
-      let name = `${safeFilenamePart(submission.title, 60)}_${submission.id}.pdf`;
+      let name = abstractFileName(submission);
       while (usedNames.has(name)) name = `_${name}`;
       usedNames.add(name);
 

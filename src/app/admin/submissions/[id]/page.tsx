@@ -10,6 +10,7 @@ import {
   REVIEW_RATING_LABELS,
   REVIEW_RATING_VALUES,
 } from "@/lib/labels";
+import { abstractFileName } from "@/lib/abstract-filename";
 import { DecisionButtons } from "./decision-buttons";
 import { DeleteSubmissionButton } from "./delete-submission-button";
 import { PresentationCategorySelect } from "./presentation-category-select";
@@ -107,7 +108,7 @@ export default async function AdminSubmissionDetailPage({
               rel="noopener noreferrer"
               className="underline underline-offset-4"
             >
-              {submission.file.fileName}
+              {abstractFileName(submission, submission.file.fileName)}
             </a>
           ) : (
             <p className="text-muted-foreground">No abstract file uploaded.</p>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { abstractFileName, asciiFallbackName } from "@/lib/abstract-filename";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -34,10 +35,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   }
 
   const { file } = submission;
+  const downloadName = abstractFileName(submission, file.fileName);
   return new NextResponse(new Uint8Array(file.data), {
     headers: {
       "Content-Type": file.mimeType,
-      "Content-Disposition": `inline; filename="${encodeURIComponent(file.fileName)}"`,
+      "Content-Disposition": `inline; filename="${asciiFallbackName(
+        downloadName
+      )}"; filename*=UTF-8''${encodeURIComponent(downloadName)}`,
       "Content-Length": String(file.size),
     },
   });

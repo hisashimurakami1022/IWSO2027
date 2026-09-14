@@ -6,6 +6,7 @@ import { WithdrawSubmissionButton } from "@/components/withdraw-submission-butto
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SUBMISSION_STATUS_LABELS, DECISION_LABELS } from "@/lib/labels";
+import { abstractFileName } from "@/lib/abstract-filename";
 
 export default async function SubmissionDetailPage({
   params,
@@ -106,7 +107,7 @@ export default async function SubmissionDetailPage({
                 rel="noopener noreferrer"
                 className="underline underline-offset-4"
               >
-                {submission.file.fileName}
+                {abstractFileName(submission, submission.file.fileName)}
               </a>
             ) : (
               <p className="text-muted-foreground">No abstract file uploaded.</p>

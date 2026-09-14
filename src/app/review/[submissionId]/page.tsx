@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PRESENTATION_TYPE_LABELS } from "@/lib/labels";
+import { abstractFileName } from "@/lib/abstract-filename";
 import { ReviewForm } from "./review-form";
 
 export default async function ReviewSubmissionPage({
@@ -56,7 +57,7 @@ export default async function ReviewSubmissionPage({
               rel="noopener noreferrer"
               className="underline underline-offset-4"
             >
-              {submission.file.fileName}
+              {abstractFileName(submission, submission.file.fileName)}
             </a>
           ) : (
             <p className="text-muted-foreground">No abstract file uploaded.</p>
