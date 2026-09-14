@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import NextAuth from "next-auth";
 import Resend from "next-auth/providers/resend";
 import { PrismaAdapter } from "@auth/prisma-adapter";
@@ -15,18 +16,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Resend({
       from: process.env.EMAIL_FROM,
       // Institutional email security systems (e.g. Microsoft Defender Safe
-      // Links) fetch every link in an incoming email to scan it, before the
-      // recipient ever opens it. Since the real Auth.js callback URL signs
-      // in on the very first GET, that scan silently consumes the one-time
-      // token — the user's own click then fails as "already used". Emailing
-      // a link to our own no-op confirmation page instead, which requires a
-      // real click to reach the actual callback, defeats that: scanners
-      // fetch the confirmation page (harmless) but don't click buttons on
-      // it, so the token survives for the real click.
-      async sendVerificationRequest({ identifier: to, url, provider }) {
+      // Links) fetch links in an incoming email to scan it before the
+      // recipient ever opens it — and some decode nested URLs found inside
+      // a link's own query string, not just the top-level href. Our first
+      // fix (mail a link to a no-op confirmation page instead of the real
+      // callback) isn't enough on its own if the real callback URL is still
+      // sitting in that link's query string in plain sight — a scanner that
+      // unwraps it can still consume the one-time token before the
+      // recipient clicks.
+      //
+      // So the real callback URL (which carries the token) never appears in
+      // the email at all. We hand it an opaque, unguessable `ref` instead,
+      // stored server-side in SignInRequest. Loading the confirmation page
+      // with that ref (GET) only reads it — safe no matter how many times a
+      // scanner fetches it. Only completeSignInAction, reachable solely via
+      // that page's form submit (POST), consumes it and signs the user in.
+      async sendVerificationRequest({ identifier: to, url, expires, provider }) {
         const host = new URL(url).host;
+
+        await prisma.signInRequest.deleteMany({ where: { expires: { lt: new Date() } } });
+        const ref = randomBytes(24).toString("hex");
+        await prisma.signInRequest.create({ data: { ref, callbackUrl: url, expires } });
+
         const confirmUrl = new URL("/verify-request/confirm", APP_URL);
-        confirmUrl.searchParams.set("url", url);
+        confirmUrl.searchParams.set("ref", ref);
 
         const res = await fetch("https://api.resend.com/emails", {
           method: "POST",

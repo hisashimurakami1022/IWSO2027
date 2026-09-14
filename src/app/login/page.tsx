@@ -35,6 +35,12 @@ export default async function LoginPage({
               the password form below if you&apos;ve set one.
             </p>
           )}
+          {error === "verification_failed" && (
+            <p className="mb-4 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              That sign-in link has already been used or has expired. If you requested more than
+              one, only the most recently sent email works — otherwise, request a new one below.
+            </p>
+          )}
           <form action={loginWithLinkAction} className="space-y-4">
             <input type="hidden" name="callbackUrl" value={callbackUrl ?? ""} />
             <div className="space-y-2">

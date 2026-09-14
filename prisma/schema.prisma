@@ -125,6 +125,20 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// Short-lived pointer used by the magic-link confirmation flow (see
+// sendVerificationRequest in src/lib/auth.ts). The emailed link only ever
+// carries this opaque ref, never the real callback URL/token — so a mail
+// security scanner that decodes and prefetches links in the message body
+// can't consume the sign-in token before the recipient clicks. Loading the
+// confirmation page (GET) only reads this row; completeSignInAction (POST,
+// only reachable by an actual form submit) is what consumes it.
+model SignInRequest {
+  ref         String   @id @default(cuid())
+  callbackUrl String
+  expires     DateTime
+  createdAt   DateTime @default(now())
+}
+
 // --- Conference master data ---
 
 model Track {

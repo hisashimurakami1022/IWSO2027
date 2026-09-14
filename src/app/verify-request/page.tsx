@@ -12,8 +12,9 @@ export default function VerifyRequestPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          If you don&apos;t see the email, please check your spam folder or wait a moment and try
-          again.
+          This can take a few minutes to arrive, especially from university or corporate email
+          addresses that scan incoming mail for security. If you don&apos;t see it after a while,
+          check your spam folder — no need to request another one in the meantime.
         </CardContent>
       </Card>
     </div>
