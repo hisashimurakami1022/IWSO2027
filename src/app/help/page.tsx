@@ -23,7 +23,7 @@ export default async function HelpPage() {
       <div>
         <h1 className="text-2xl font-semibold">User Guides</h1>
         <p className="text-muted-foreground">
-          How to use the IWSO 2027 submission, review, and program system.
+          How to use the IWSO 12 submission, review, and program system.
         </p>
       </div>
 

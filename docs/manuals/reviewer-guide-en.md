@@ -1,14 +1,14 @@
-# IWSO 2027 — Reviewer Guide
+# IWSO 12 — Reviewer Guide
 
 This guide covers signing in, finding your assigned submissions, and submitting your review.
 
 ## 1. Signing in
 
-IWSO 2027 uses passwordless sign-in — you don't need to register or remember a password.
+IWSO 12 uses passwordless sign-in — you don't need to register or remember a password.
 
 1. Go to the sign-in page and enter your email address.
 2. Click **Send sign-in link**.
-3. Open the email from IWSO 2027 and click the link inside it.
+3. Open the email from IWSO 12 and click the link inside it.
 4. You'll be signed in automatically. The link expires after a while and can only be used once — request a new one if it doesn't work.
 
 If you've been assigned as a reviewer, sign in with the same email address the Chair used to add you.

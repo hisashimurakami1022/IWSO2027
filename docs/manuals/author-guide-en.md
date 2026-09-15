@@ -1,14 +1,14 @@
-# IWSO 2027 — Author Guide
+# IWSO 12 — Author Guide
 
 This guide covers everything an author needs to submit an abstract, track its status, and respond to a decision.
 
 ## 1. Signing in
 
-IWSO 2027 uses passwordless sign-in — there is no account to register in advance and no password to remember.
+IWSO 12 uses passwordless sign-in — there is no account to register in advance and no password to remember.
 
 1. Go to the sign-in page and enter your email address.
 2. Click **Send sign-in link**.
-3. Check your inbox for an email from IWSO 2027 and click the link inside it.
+3. Check your inbox for an email from IWSO 12 and click the link inside it.
 4. You'll be signed in automatically. The link expires after a while and can only be used once, so request a new one if it doesn't work.
 
 Your account is created automatically the first time you sign in — there's no separate registration step.

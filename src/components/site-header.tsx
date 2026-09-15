@@ -19,7 +19,7 @@ export async function SiteHeader() {
             height={32}
             className="rounded-full"
           />
-          IWSO 2027
+          IWSO 12
         </Link>
 
         <nav className="flex items-center gap-4 text-sm">

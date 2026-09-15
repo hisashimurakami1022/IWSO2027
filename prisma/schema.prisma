@@ -170,7 +170,7 @@ model ReviewerExpertise {
 
 model ConferenceSettings {
   id                 String    @id @default(cuid())
-  conferenceName     String    @default("IWSO 2027")
+  conferenceName     String    @default("IWSO 12")
   timezone           String    @default("Asia/Tokyo")
   submissionDeadline DateTime?
   reviewDeadline     DateTime?

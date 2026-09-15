@@ -24,7 +24,7 @@ export default async function ConfirmSignInPage({
           <CardTitle>Confirm sign-in</CardTitle>
           <CardDescription>
             {valid
-              ? "For your security, click below to finish signing in to IWSO 2027."
+              ? "For your security, click below to finish signing in to IWSO 12."
               : "This sign-in link is invalid or has expired. Request a new one from the sign-in page."}
           </CardDescription>
         </CardHeader>

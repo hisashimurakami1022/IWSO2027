@@ -1,4 +1,4 @@
-# IWSO 2027 — Chair Guide
+# IWSO 12 — Chair Guide
 
 This guide covers the full conference administration workflow: tracks, reviewer assignment, decisions, notifications, and program building.
 

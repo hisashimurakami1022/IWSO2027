@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "IWSO 2027",
-  description: "IWSO 2027 Abstract Submission, Review & Program System",
+  title: "IWSO 12",
+  description: "IWSO 12 Abstract Submission, Review & Program System",
 };
 
 export default function RootLayout({

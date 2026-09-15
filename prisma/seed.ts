@@ -7,7 +7,7 @@ async function main() {
   if (!settings) {
     await prisma.conferenceSettings.create({
       data: {
-        conferenceName: "IWSO 2027",
+        conferenceName: "IWSO 12",
         timezone: "Asia/Tokyo",
         submissionDeadline: new Date("2027-01-15T23:59:00+09:00"),
         reviewDeadline: new Date("2027-02-15T23:59:00+09:00"),

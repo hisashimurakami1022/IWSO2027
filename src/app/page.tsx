@@ -34,12 +34,12 @@ export default async function Home() {
             className="drop-shadow-lg"
           />
           <h1 className="text-5xl font-bold tracking-tight sm:text-6xl">
-            {settings?.conferenceName ?? "IWSO 2027"}
+            {settings?.conferenceName ?? "IWSO 12"}
           </h1>
           <p className="text-lg font-medium text-white/85 sm:text-xl">Abstract Submission</p>
           <p className="mx-auto max-w-2xl text-white/85">
-            Submission, review, and program system for the IWSO 2027 international conference,
-            held in Fukuoka, Japan (scheduled for May 2027).
+            Submission, review, and program system for the IWSO 12 international conference, held
+            in Fukuoka, Japan (scheduled for May 2027).
           </p>
           <div className="flex justify-center gap-3 pt-2">
             {user ? (

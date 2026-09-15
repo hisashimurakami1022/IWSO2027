@@ -1,6 +1,6 @@
-# IWSO 2027 Submission System
+# IWSO 12 Submission System
 
-Abstract submission, peer review, decision, and program-scheduling system for the IWSO 2027 international conference (May 2027).
+Abstract submission, peer review, decision, and program-scheduling system for the IWSO 12 international conference (May 2027).
 
 ## Tech stack
 

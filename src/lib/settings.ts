@@ -5,7 +5,7 @@ export async function getConferenceSettings() {
   return (
     settings ?? {
       id: "",
-      conferenceName: "IWSO 2027",
+      conferenceName: "IWSO 12",
       timezone: "Asia/Tokyo",
       submissionDeadline: null,
       reviewDeadline: null,
