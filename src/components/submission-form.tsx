@@ -15,8 +15,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PRESENTATION_TYPE_LABELS } from "@/lib/labels";
-import { toSubscript, toSuperscript, toNormalScript } from "@/lib/scientific-notation";
-import { toast } from "sonner";
 
 type Track = { id: string; name: string; studentAward: boolean };
 type MaterialSystem = { id: string; name: string };
@@ -106,7 +104,6 @@ export function SubmissionForm({
   const [affiliations, setAffiliations] = useState<AffiliationEntry[]>(initial.affiliations);
   const [authors, setAuthors] = useState<AuthorRow[]>(initial.authors);
   const nextKey = useRef(initial.nextKey);
-  const titleInputRef = useRef<HTMLInputElement>(null);
   const [trackId, setTrackId] = useState(defaultValues?.trackId ?? "");
   const [studentAwardApplied, setStudentAwardApplied] = useState(
     defaultValues?.studentAwardApplied ?? false
@@ -115,26 +112,6 @@ export function SubmissionForm({
   const [supervisorEmail, setSupervisorEmail] = useState(defaultValues?.supervisorEmail ?? "");
 
   const studentAwardTrack = tracks.find((t) => t.id === trackId)?.studentAward ?? false;
-
-  // Converts the currently-selected text in the Title field via `transform`
-  // (e.g. "2" -> "₂" for chemical formulas). The input is uncontrolled, so
-  // this edits its DOM value directly rather than going through React
-  // state — the form still reads the live value at submit time either way.
-  function applyScriptToTitleSelection(transform: (s: string) => string) {
-    const el = titleInputRef.current;
-    if (!el) return;
-    const start = el.selectionStart ?? 0;
-    const end = el.selectionEnd ?? 0;
-    if (start === end) {
-      toast.error("Select part of the title first (e.g. a number), then click a button.");
-      return;
-    }
-    const value = el.value;
-    const converted = transform(value.slice(start, end));
-    el.value = value.slice(0, start) + converted + value.slice(end);
-    el.focus();
-    el.setSelectionRange(start, start + converted.length);
-  }
 
   function addKeyword() {
     const value = keywordInput.trim();
@@ -236,46 +213,7 @@ export function SubmissionForm({
 
       <div className="space-y-2">
         <Label htmlFor="title">Title</Label>
-        <Input
-          id="title"
-          name="title"
-          required
-          maxLength={300}
-          defaultValue={defaultValues?.title}
-          ref={titleInputRef}
-        />
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-muted-foreground">
-            For chemical formulas: select part of the title (e.g. Bi2O3 &rarr; Bi₂O₃), then
-          </span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-6 px-2 text-xs"
-            onClick={() => applyScriptToTitleSelection(toSubscript)}
-          >
-            Subscript
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-6 px-2 text-xs"
-            onClick={() => applyScriptToTitleSelection(toSuperscript)}
-          >
-            Superscript
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-6 px-2 text-xs"
-            onClick={() => applyScriptToTitleSelection(toNormalScript)}
-          >
-            Normal
-          </Button>
-        </div>
+        <Input id="title" name="title" required maxLength={300} defaultValue={defaultValues?.title} />
         {state.errors?.title && (
           <p className="text-sm text-destructive">{state.errors.title[0]}</p>
         )}
