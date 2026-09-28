@@ -1,17 +1,14 @@
-// Converts plain digits/symbols/letters to real Unicode subscript/
-// superscript characters (e.g. "2" -> "₂"), for chemical formulas and
-// oxidation states in submission titles (Bi2O3 -> Bi₂O₃, Fe3+ -> Fe³⁺,
-// AlxGa1-xO -> AlₓGa₁₋ₓO). These are ordinary text characters, not markup,
-// so they render correctly wherever a title is shown — admin views, CSV
-// export, email subjects, the program PDF — with no HTML
-// parsing/sanitizing needed anywhere.
+// Converts plain digits/symbols to real Unicode subscript/superscript
+// characters (e.g. "2" -> "₂"), for chemical formulas and oxidation states
+// in submission titles (Bi2O3 -> Bi₂O₃, Fe3+ -> Fe³⁺). These are ordinary
+// text characters, not markup, so they render correctly wherever a title
+// is shown — admin views, CSV export, email subjects, the program PDF —
+// with no HTML parsing/sanitizing needed anywhere.
 //
-// Unicode only defines subscript forms for digits, a handful of symbols
-// (+ - = ( )), and a small set of lowercase letters used in phonetics
-// (a e h k l m n o p s t x) — not the full alphabet, and no uppercase at
-// all. Letters outside that set (e.g. "y", a common alloy-composition
-// variable alongside "x") pass through unchanged; there is no Unicode
-// subscript form for them to convert to.
+// Unicode only defines subscript/superscript forms for digits and a
+// handful of symbols (+ - = ( )), not the full alphabet, so letters pass
+// through unchanged. That covers stoichiometry and ionic notation, which
+// is nearly all-numeric, but not arbitrary word-level sub/superscript.
 const SUBSCRIPT_MAP: Record<string, string> = {
   "0": "₀",
   "1": "₁",
@@ -28,18 +25,6 @@ const SUBSCRIPT_MAP: Record<string, string> = {
   "=": "₌",
   "(": "₍",
   ")": "₎",
-  a: "ₐ",
-  e: "ₑ",
-  h: "ₕ",
-  k: "ₖ",
-  l: "ₗ",
-  m: "ₘ",
-  n: "ₙ",
-  o: "ₒ",
-  p: "ₚ",
-  s: "ₛ",
-  t: "ₜ",
-  x: "ₓ",
 };
 
 const SUPERSCRIPT_MAP: Record<string, string> = {
@@ -84,8 +69,3 @@ export function toSuperscript(text: string): string {
 export function toNormalScript(text: string): string {
   return convert(text, NORMAL_MAP);
 }
-
-/** Letters the Subscript button can actually convert, for UI hint text. */
-export const SUBSCRIPT_SUPPORTED_LETTERS = Object.keys(SUBSCRIPT_MAP)
-  .filter((ch) => /[a-z]/.test(ch))
-  .join(" ");

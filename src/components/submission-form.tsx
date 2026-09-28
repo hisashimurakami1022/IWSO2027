@@ -15,12 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PRESENTATION_TYPE_LABELS } from "@/lib/labels";
-import {
-  toSubscript,
-  toSuperscript,
-  toNormalScript,
-  SUBSCRIPT_SUPPORTED_LETTERS,
-} from "@/lib/scientific-notation";
+import { toSubscript, toSuperscript, toNormalScript } from "@/lib/scientific-notation";
 import { toast } from "sonner";
 
 type Track = { id: string; name: string; studentAward: boolean };
@@ -251,8 +246,7 @@ export function SubmissionForm({
         />
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs text-muted-foreground">
-            For chemical formulas: select part of the title (e.g. AlxGa1-xO &rarr; AlₓGa₁₋ₓO),
-            then
+            For chemical formulas: select part of the title (e.g. Bi2O3 &rarr; Bi₂O₃), then
           </span>
           <Button
             type="button"
@@ -282,10 +276,6 @@ export function SubmissionForm({
             Normal
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground">
-          Subscript supports digits, + - = ( ), and the letters {SUBSCRIPT_SUPPORTED_LETTERS}
-          &nbsp;— other letters (e.g. y) can&apos;t be converted.
-        </p>
         {state.errors?.title && (
           <p className="text-sm text-destructive">{state.errors.title[0]}</p>
         )}
