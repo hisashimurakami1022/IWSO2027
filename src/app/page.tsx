@@ -75,7 +75,7 @@ export default async function Home() {
           </CardHeader>
           <CardContent className="text-lg font-semibold">
             {settings?.submissionDeadline
-              ? format(settings.submissionDeadline, "MMM d, yyyy (EEE) HH:mm")
+              ? `${format(settings.submissionDeadline, "MMM d, yyyy (EEE) HH:mm")} (JST)`
               : "TBD"}
           </CardContent>
         </Card>
