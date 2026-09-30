@@ -45,3 +45,6 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# Local one-off data backups (may contain PII, PDFs) — never commit
+/backups
